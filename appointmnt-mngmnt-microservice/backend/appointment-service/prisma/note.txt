@@ -1,0 +1,8 @@
+Pull Schema (if the database already exists):
+  npx prisma db pull
+
+
+Create a New Migration (if setting up from scratch):
+  npx prisma migrate dev --name init
+
+

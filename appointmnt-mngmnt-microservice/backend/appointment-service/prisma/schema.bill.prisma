@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/bill-client"
+  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
+  //binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("BILLING_DATABASE_URL")
+}
+
+model bill {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  amount      Float
+  createdAt   DateTime @default(now())
+  description String
+}

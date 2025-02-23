@@ -1,0 +1,52 @@
+from these script commands ""scripts": {
+    "dbpull:user":"npx prisma db pull --schema=./prisma/schema.user.prisma",
+    "dbpull:appointment":"npx prisma db pull --schema=./prisma/schema.appointment.prisma",
+    "dbpull:bill":"npx prisma db pull --schema=./prisma/schema.bill.prisma",
+    "dbpull:all":"npm run dbpull:user && npm run dbpull:appointment && npm run dbpull:bill",
+    "migration:user": "npx prisma migrate dev --name init --schema=./prisma/schema.user.prisma ",
+    "migration:appointment": "npx prisma migrate dev --name init --schema=./prisma/schema.appointment.prisma ",
+    "migration:bill": "npx prisma migrate dev --name init --schema=./prisma/schema.bill.prisma ",
+    "migrate:all": "npm run migration:appointment && npm run migration:bill && npm run  migration:user",   
+    "generate:user": "npx prisma generate --schema=./prisma/schema.user.prisma",
+  "generate:appointment": "npx prisma generate --schema=./prisma/schema.appointment.prisma",
+  "generate:bill": "npx prisma generate --schema=./prisma/schema.bill.prisma",
+  "generate:all": "npm run generate:user && npm run generate:appointment && npm run generate:bill",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"nodemon\" \"ts-node src/grpcServer.ts\"",
+    "dev1": "nodemon",
+    "build": "tsc && cp -r src/protos dist/protos",
+    "start": "concurrently \"node dist/index.js\" \"node dist/grpcAServer.js\"",
+    "start1": "node dist/server.js"
+  },", which ones should i add here"# Use an official Node.js image
+FROM node:18
+
+# Set working directory specific to the service
+WORKDIR /appointment-service
+
+# Copy package.json and install dependencies
+COPY package.json package-lock.json ./
+#RUN npm install --omit=dev
+RUN npm ci --omit=dev
+
+# Copy application files
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=production
+
+# Set environment variables from Docker Compose
+#ARG SERVICE_PORT
+#ARG USER_PROTO_PORT
+#ARG APPOINTMENT_PROTO_PORT
+
+#ENV PORT=$SERVICE_PORT
+#ENV USER_PROTO_PORT=$USER_PROTO_PORT
+#ENV APPOINTMENT_PROTO_PORT=$APPOINTMENT_PROTO_PORT
+
+# Expose the port for this service
+ EXPOSE 3003
+#EXPOSE 3003 $PORT $USER_PROTO_PORT $APPOINTMENT_PROTO_PORT
+
+# Start the service
+CMD ["npm", "start"]
+" , as i am trying to connect all the services to each other i.e db, redis, rabitmq and individual express app images 

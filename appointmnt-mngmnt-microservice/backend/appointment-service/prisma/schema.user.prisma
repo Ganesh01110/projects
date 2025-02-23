@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/user-client"
+  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
+  //binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("USER_DATABASE_URL")
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique(map: "User_email_key")
+  password  String
+  createdAt DateTime @default(now())
+}

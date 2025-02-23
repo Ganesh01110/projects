@@ -1,0 +1,8 @@
+node_modules
+# Keep environment variables out of version control
+
+#ignoring prisma config
+prisma/generated/
+prisma/query_engine*
+prisma/*.dll
+prisma/*.node

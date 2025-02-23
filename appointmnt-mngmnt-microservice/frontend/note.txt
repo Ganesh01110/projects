@@ -1,0 +1,97 @@
+--Build the Docker Image
+
+docker build -t hms-frontend .
+
+--Run the Container
+
+docker run -d -p 5173:80 --name hms-fe hms-frontend
+
+-d: Run in detached mode
+-p 5173:80: Map container port 80 to host 5173
+--name hms-fe: Container name
+
+--http://localhost:5173
+
+--after restart
+docker images
+
+--If you don’t see your image, it might have been deleted, and you’ll need to rebuild it:
+
+docker build -t hms-frontend .
+
+--Check if the container exists
+
+docker ps -a
+
+
+--Start an existing stopped container
+
+docker start hms-fe
+
+--If you don’t remember the container name, find it using:
+
+docker ps -a --filter "ancestor=hms-frontend"
+
+--Then, restart it using:
+
+docker start <container-id>
+
+--If the container doesn’t exist, you need to re-run the image:
+
+docker run -d -p 5173:80 --name hms-fe hms-frontend
+
+
+--Stop a Specific Running Container
+
+docker stop <container_id>
+
+docker ps
+
+--Stop Multiple Specific Containers
+
+docker stop <container_id1> <container_id2>
+
+
+--Stop All Running Containers
+
+docker stop $(docker ps -q)
+
+--Remove a Specific Stopped Container
+
+docker rm <container_id>
+
+
+--Remove Multiple Containers
+
+docker rm <container_id1> <container_id2>
+
+
+--Remove All Stopped Containers
+
+docker rm $(docker ps -aq)
+
+--Remove a Specific Image
+
+docker rmi <image_id>
+
+docker rmi <image_id>
+
+--Remove All Unused Images (Dangling & Unused)
+
+docker image prune -a
+
+--Stop & Remove All Containers and Images
+
+docker stop $(docker ps -q) && docker rm $(docker ps -aq) && docker rmi $(docker images -q)
+
+
+--Remove All Docker Data (⚠️ Reset Docker Completely)
+
+docker system prune -a --volumes
+
+--(This removes everything, including:
+
+Containers
+Images
+Networks
+Volumes)

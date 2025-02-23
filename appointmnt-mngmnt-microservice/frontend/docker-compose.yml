@@ -1,0 +1,12 @@
+version: '3'
+services:
+  frontend:
+    build: .
+    ports:
+      - "5173:80"
+    restart: always
+    networks:
+      - backend
+
+networks:
+  backend:

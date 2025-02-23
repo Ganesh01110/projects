@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "combined service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm start --prefix user-service\" \"npm start --prefix billing-service\" \"npm start --prefix appointment-service\" \"npm start --prefix gateway\""
+  },
+  "author": "ganesh sahu",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

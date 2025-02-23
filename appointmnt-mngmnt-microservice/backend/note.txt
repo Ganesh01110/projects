@@ -1,0 +1,34 @@
+docker-compose up --build
+docker ps
+docker logs <container_name>
+docker exec -it <appointment-service-container> sh
+npx prisma db pull --schema=./prisma/schema.appointment.prisma
+npx prisma migrate dev --name init --schema=./prisma/schema.appointment.prisma
+npx prisma generate --schema=./prisma/schema.appointment.prisma
+docker-compose down -v  # Remove old containers and volumes
+docker-compose build    # Build new images
+docker-compose up       # Start services
+docker-compose logs -f
+docker exec -it <service-name> redis-cli ping
+docker exec -it <service-name> rabbitmqctl status
+-----------
+docker-compose down -v
+docker-compose build
+docker-compose up -d
+docker logs backend-mysql
+------
+docker-compose down -v
+docker-compose up --build
+--
+-stop all - docker compose down
+-Rebuild and Start the Containers - docker compose up --build -d
+-Check Running Containers - docker ps
+
+-View Logs (for Debugging)
+docker logs -f gateway
+docker logs -f user-service
+docker logs -f billing-service
+docker logs -f appointment-service
+
+--curl from cmd
+curl -X GET http://localhost:3000/user

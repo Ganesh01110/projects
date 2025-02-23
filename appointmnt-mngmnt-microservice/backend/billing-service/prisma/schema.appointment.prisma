@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/appointment-client"
+  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
+  //binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("APPOINTMENT_DATABASE_URL")
+}
+
+model appointment {
+  id        String @id @default(uuid())
+  userId    String
+  date      DateTime
+  status    String
+}
+
+model user {
+  id          Int    @id @default(autoincrement())
+  name        String @db.VarChar(255)
+  email       String @unique(map: "email") @db.VarChar(255)
+  age         Int?
+  case        String
+  joiner_name String
+}
+
+model user_details {
+  id           Int    @id @default(autoincrement())
+  namdocument1 String
+  namdocument2 String
+  namdocument3 String
+}
+
+
+model Patient {
+  patientId                     Int      @id @default(autoincrement())
+  RegistrationNo                String   @unique
+  admission_date                DateTime?
+  department                    String?
+  id_no                         String?
+  admission_time                DateTime?
+  admission_type                AdmissionType @default(OPD)
+  PatientName                   String
+  Gender                        String
+  Age                           Int?
+  religion                      String?
+  GuardianName                  String?
+  phoneNo                       String?
+  JoinerName                    String?
+  JoinerphoneNo                 String?
+  RelationShip                  String?
+  Address                       String?
+  City                          String?
+  state                         String?
+  district                      String?
+  PostalCode                    String?
+  attending_doctor              String?
+  CabinNo                       String?
+  Status                        AdmissionType?
+  registration_date             DateTime @default(now())
+  Problems                      String?
+  Remarks                       String?
+  Notification_visibility       NotificationStatus @default(NotViewed)
+  Lab_Notification_visibility   NotificationStatus @default(NotViewed)
+  Pharma_Notification_visibility NotificationStatus @default(NotViewed)
+  discharge_date                DateTime?
+
+  admissions                    PatientAdmission[]
+  doctorMappings                PatientDoctorMapping[]
+  departmentHistory             PatientDepartmentHistory[]
+  doctorVisitHistory            DoctorPatientHistory[]
+}
+
+model PatientAdmission {
+  id              Int            @id @default(autoincrement())
+  patientId       Int
+  admission_type  AdmissionType
+  current_dept_type AdmissionType
+  admission_date  DateTime
+  discharge_date  DateTime?
+  current_status  Status
+
+  patient         Patient        @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
+}
+
+model PatientDoctorMapping {
+  mapping_id      Int            @id @default(autoincrement())
+  patientId       Int
+  doctor_id       String
+  department      AdmissionType?
+  role            DoctorRole
+  role_name       String?
+  consultation_date DateTime @default(now())
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+  status          Status      @default(ACTIVE)
+
+  patient         Patient      @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
+  doctorVisits    DoctorVisit[]
+}
+
+model DoctorVisit {
+  visit_id         Int            @id @default(autoincrement())
+  mapping_id       Int
+  department       AdmissionType?
+  visit_datetime   DateTime       @default(now())
+  medicines_prescribed String?
+  remarks          String?
+  suggestions      String?
+
+  mapping          PatientDoctorMapping @relation(fields: [mapping_id], references: [mapping_id], onDelete: Cascade)
+}
+
+model PatientDepartmentHistory {
+  history_id        Int            @id @default(autoincrement())
+  patientId         Int
+  previous_department AdmissionType?
+  current_department AdmissionType?
+  transition_date   DateTime       @default(now())
+  remarks           String?
+
+  patient          Patient         @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
+}
+
+model DoctorPatientHistory {
+  visit_history_id Int            @id @default(autoincrement())
+  patientId        Int
+  doctorId         String
+  visit_datetime   DateTime
+  department       AdmissionType @default(OPD)
+  medicines_prescribed String?
+  remarks          String?
+  suggestions      String?
+  doctor_fee       Decimal @db.Decimal(10,2)
+
+  patient          Patient         @relation(fields: [patientId], references: [patientId])
+}
+
+enum AdmissionType {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum NotificationStatus {
+  NotViewed
+  Viewed
+}
+
+enum DoctorRole {
+  Consulting
+  Attending
+  Referral
+  Other
+}
+
+enum Status {
+  ACTIVE
+  DISCHARGED
+}
+
+model Medicine {
+  medicine_id      Int      @id @default(autoincrement())
+  medicine_name    String  
+  hsn             String?  
+  batch_no        String?  
+  serial_no       String?  
+  company_name    String?  
+  expiry_date     DateTime?  
+  pieces_per_unit Int?  
+  mrp             Decimal?  
+  purchase_price  Decimal?  
+}
+

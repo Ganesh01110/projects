@@ -1,0 +1,175 @@
+still the error is "
+[1] gRPC server is running on port 50051
+[1] (node:13392) DeprecationWarning: Calling start() is no longer necessary. It can be safely omitted.
+[1] (Use `node --trace-deprecation ...` to show where the warning was created)
+[0] User service running on http://localhost:3001
+[0] ✅ Database connected successfully
+[0] Connected to Redis
+[0] ✅ RabbitMQ Connected & Channel Created
+[0] ✅ RabbitMQ Connected & Channel Created
+[0] 📩 Received event data: {
+[0]   event: 'BILL_CREATED',
+[0]   bill: {
+[0]     id: 9,
+[0]     patientId: 5,
+[0]     amount: 300,
+[0]     createdAt: '2025-02-19T17:21:26.547Z',
+[0]     description: 'user 5 1st bill'
+[0]   }
+[0] }
+[0] Extracted patientId: 5
+[0] 📩 Received event data: {
+[0]   event: 'BILL_CREATED',
+[0]   bill: {
+[0]     id: 9,
+[0]     patientId: 5,
+[0]     amount: 300,
+[0]     createdAt: '2025-02-19T17:21:26.547Z',
+[0]     description: 'user 5 1st bill'
+[0]   }
+[0] } {
+[0]   id: 9,
+[0]   patientId: 5,
+[0]   amount: 300,
+[0]   createdAt: '2025-02-19T17:21:26.547Z',
+[0]   description: 'user 5 1st bill'
+[0] } 5
+[0] Processing bill_CREATED event: 5
+[0] Received patientId: 5
+[0] Type of patientId: number
+[0] node:events:496
+[0]       throw er; // Unhandled 'error' event
+[0]       ^
+[0]
+[0] Error: Channel closed by server: 406 (PRECONDITION-FAILED) with message "PRECONDITION_FAILED - unknown delivery tag 1"
+[0]     at Channel.accept (C:\Users\DELL\OneDrive\Desktop\microservices\micro-hospital-service\backend\user-service\node_modules\amqplib\lib\channel.js:320:19)
+[0]     at Connection.mainAccept [as accept] (C:\Users\DELL\OneDrive\Desktop\microservices\micro-hospital-service\backend\user-service\node_modules\amqplib\lib\connection.js:579:33)
+[0]     at Socket.go (C:\Users\DELL\OneDrive\Desktop\microservices\micro-hospital-service\backend\user-service\node_modules\amqplib\lib\connection.js:431:16)
+[0]     at Socket.emit (node:events:518:28)
+[0]     at emitReadable_ (node:internal/streams/readable:834:12)
+[0]     at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+[0] Emitted 'error' event on ChannelModel instance at:
+[0]     at Connection.emit (node:events:518:28)
+[0]     at Connection.onSocketError (C:\Users\DELL\OneDrive\Desktop\microservices\micro-hospital-service\backend\user-service\node_modules\amqplib\lib\connection.js:306:12)
+[0]     at Connection.emit (node:events:518:28)
+[0]     at Socket.go (C:\Users\DELL\OneDrive\Desktop\microservices\micro-hospital-service\backend\user-service\node_modules\amqplib\lib\connection.js:434:14)
+[0]     at Socket.emit (node:events:518:28)
+[0]     at emitReadable_ (node:internal/streams/readable:834:12)
+[0]     at process.processTicksAndRejections (node:internal/process/task_queues:81:21) {
+[0]   code: 406,
+[0]   classId: 60,
+[0]   methodId: 80
+[0] }
+[0]
+[0] Node.js v20.18.3
+[0] node dist/index.js exited with code 1", with the pubsub logic "import amqp from "amqplib";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost";
+
+// if (!process.env.RABBITMQ_URL) {
+//   throw new Error("RABBITMQ_URL is not defined. Check your .env file.");
+// }
+
+export let channel: amqp.Channel;
+
+export const connectQueue = async () => {
+  try {
+    const connection = await amqp.connect(RABBITMQ_URL);
+    channel = await connection.createChannel();
+    console.log("Connected to RabbitMQ");
+  } catch (error) {
+    console.error("RabbitMQ Connection Error:", error);
+    process.exit(1);
+  }
+};
+
+export const publishToQueue = async (queueName: string, message: object) => {
+  if (!channel) throw new Error("RabbitMQ channel is not initialized");
+  await channel.assertQueue(queueName, { durable: true });
+  channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)));
+  console.log(`Message published to queue ${queueName}:`, message);
+};
+
+export const consumeFromQueue = async (
+  queueName: string,
+  callback: (message: any) => void
+) => {
+  if (!channel) throw new Error("RabbitMQ channel is not initialized");
+  await channel.assertQueue(queueName, { durable: true });
+  channel.consume(queueName, (message) => {
+    if (!message) return;
+
+    if (message) {
+      try {
+        console.log(
+          `Processing USER_CREATED event: ${message.content.toString()}`
+        );
+        const content = JSON.parse(message.content.toString());
+        callback(content);
+        channel.ack(message);
+      } catch (error) {
+        console.error("Error processing message:", error);
+        channel.nack(message, false, true); // ❌ Avoid calling ack() and nack() together
+      }
+    }
+  });
+};
+" and used in "import { UserDB,BillingDB } from './prismaClient';
+
+import { publishToQueue , consumeFromQueue} from './queue1';
+import { setCache, getCache, invalidateCache } from './cache';
+
+
+const USER_QUEUE = 'userQueue';
+const BILLING_QUEUE = 'billingQueue';
+
+const processBillingCreatedEvent = async (patientId: number) => {
+  console.log(`Processing bill_CREATED event:`, patientId);
+  console.log("Received patientId:", patientId);
+console.log("Type of patientId:", typeof patientId);
+
+if (!patientId) {
+  console.error("❌ Error: patientId is undefined or null");
+  return null; // Or handle this case appropriately
+}
+
+  // automatically scan for user and and its bill
+  const patient = await UserDB.user.findUnique({ where: { id:patientId} });
+  if (!patient) {
+    console.error("❌ No patient found with ID:", patientId);
+    throw new Error(`Patient with ID ${patientId} does not exist.`);
+  }
+
+  // Retrieve bills from cache or database
+  let bills = await getCache(`bills:${patientId}`);
+  if (!bills) {
+    bills = await BillingDB.bill.findMany({ where: { patientId } });
+    await setCache(`bills:${patientId}`, bills, 600);
+  }
+
+ 
+
+  console.log(`Billing entry created for patient ${patientId}`);
+};
+
+consumeFromQueue(BILLING_QUEUE, async (message:any) => {
+
+  if (!message) return;
+
+  if (message.event === "BILL_CREATED") {
+    const { bill } = message;
+        
+        // Extracting patientId correctly
+        const patientId = bill?.patientId;  
+
+        console.log("📩 Received event data:", message);
+        console.log("Extracted patientId:", patientId);
+
+    console.log("📩 Received event data:", message,message.bill,message.bill.patientId );
+    await processBillingCreatedEvent(patientId);
+  } else {
+    console.warn(`Unknown event type received in ${USER_QUEUE}:`, message.event);
+  }
+});"
