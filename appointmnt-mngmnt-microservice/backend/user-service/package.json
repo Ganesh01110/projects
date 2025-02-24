@@ -18,7 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"nodemon\" \"ts-node src/grpcServer.ts\"",
     "dev1": "nodemon",
-    "build": "tsc && cp -r src/protos dist/protos",
+    "build1": "tsc && cp -r src/protos dist/protos",
+    "build": "tsc",
     "start": "concurrently \"node dist/index.js\" \"node dist/grpcServer.js\"",
     "start1": "node dist/server.js"
   },
