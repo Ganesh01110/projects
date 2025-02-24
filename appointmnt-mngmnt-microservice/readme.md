@@ -24,7 +24,7 @@
 The system follows a **microservices architecture** with **gRPC, RabbitMQ, and Redis** for efficient communication.  
 
 🖼️ **Architecture Diagram:**  
-*(Make sure the `microservice-structure.png` is placed in the root folder of the project for correct rendering.)*  
+ 
 📍 **[Click here for full-size image](./microservice-structure.png)**  
 
 ### **Explanation of the Components**
@@ -186,8 +186,64 @@ Make sure to update credentials accordingly.
 
 ---
 
+## 🌐 Setting Up Frontend
+
+### **1️⃣ Local Setup**
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+### **2️⃣ Using Docker**
+#### **➡️ Build the Docker Image**
+```sh
+docker build -t hms-frontend .
+```
+
+#### **➡️ Run the Container**
+```sh
+docker run -d -p 5173:80 --name hms-fe hms-frontend
+```
+- `-d` : Run in detached mode
+- `-p 5173:80` : Map container port `80` to host `5173`
+- `--name hms-fe` : Set container name
+
+Access the frontend at: [http://localhost:5173](http://localhost:5173)
+
+
+#### **🔹Explanation: Serving frontend with NGINX in docker**
+
+```dockerfile
+FROM nginx:latest AS serve
+
+# Copy built files to NGINX public folder
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Explanation:**
+- Uses the **NGINX image** to serve the built application.
+- Copies the built files from the previous **build stage** (`/app/dist`) into the NGINX public folder (`/usr/share/nginx/html`).
+- Exposes **port 80** for HTTP access.
+- Runs **NGINX in the foreground** (`daemon off`) to keep the container running.
+
+This approach ensures a **lightweight production image** with only the necessary files to run the frontend efficiently.
+
+
+
+---
+
+
+
+---
 ## 📖 API Documentation
-📌 *(Provide a link to API documentation if using Swagger/Postman)*
+
 
 ---
 
