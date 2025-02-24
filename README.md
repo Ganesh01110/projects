@@ -4,7 +4,7 @@ This repository contains multiple microservice-based projects. Navigate to each 
 
 ## 📜 Available Projects
 
-- **Appointment Management System** - [appointment-mngmnt-microservice ReadMe](./appointmnt-mngmnt-microservice/README.md)
+- **Appointment Management System** - [appointment-mngmnt-microservice ReadMe](./appointmnt-mngmnt-microservice/readme.md)
 
 
 ## 🚀 General Setup Instructions
