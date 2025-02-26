@@ -48,6 +48,55 @@ The system follows a **microservices architecture** with **gRPC, RabbitMQ, and R
    - Used for efficient microservices interaction.
 
 ---
+## ⚙️ .env and prisma Setup
+
+### **1️⃣ Choose proper databse link from .env for proper link between prisma in each service**
+based on databse link when running docker setup edit databse link in docker-compose.yml
+
+eg
+ 
+ for local databse link will be :: APPOINTMENT_DATABASE_URL="mysql://root:root@mysql:3306/PrismaHospitalManagementSystem1"
+
+ from docker container to local database connection 
+ APPOINTMENT_DATABASE_URL="mysql://root:@192.168.X.X:3306/prismahospitalmanagementsystem1"
+
+ find localhost ip by below command and replace it
+ ```cmd
+ ipconfig
+```
+#### **1️⃣ for using local database from container update bind address and Grant Access to Root for External Connections**
+
+i.e bind-address = 127.0.0.1 to bind-address = 0.0.0.0
+
+and 
+
+```
+CREATE USER 'root'@'%' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+for phpmyadmin (xampp server sql access) 
+Replace 'your_password' with your MySQL root password.
+
+mariadb
+```
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+### **2️⃣ alter below setup for prisma if needed in prima directory**
+
+for database setup adjust this for seting output directory and native node in " prisma / schema.*.prisma " of each service
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/appointment-client"
+  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
+}
+
+
+
+---
 
 ## ⚙️ Prisma Setup
 
@@ -240,6 +289,13 @@ CMD ["nginx", "-g", "daemon off;"]
 
 This approach ensures a **lightweight production image** with only the necessary files to run the frontend efficiently.
 
+**If have problem in this process in container image for routing:Add a ngnix.conf file according to your file structure and run**
+```cmd
+docker stop hms-fe
+docker rm hms-fe
+docker build -t hms-frontend .
+docker run -d -p 5173:80 --name hms-fe hms-frontend
+```
 
 
 ---
