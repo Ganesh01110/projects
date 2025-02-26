@@ -22,8 +22,7 @@ services:
       - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 10 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
+    command: sh -c "sleep 10 && npm run migration:user && npm run generate:user && npm start"  
 
   billing-service:
     build:
@@ -46,8 +45,7 @@ services:
       - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 20 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
+    command: sh -c "sleep 20 && npm run migration:bill && npm run generate:bill && npm start"  
 
   appointment-service:
     build:
@@ -71,8 +69,7 @@ services:
       - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 15 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
+    command: sh -c "sleep 15 && npm run migration:appointment && npm run generate:appointment && npm start"  
 
   gateway:
     build:
@@ -87,7 +84,6 @@ services:
       - NODE_ENV=production
     networks:
       - backend
-    restart: always  
 
   redis:
     image: redis:latest
@@ -98,8 +94,7 @@ services:
       - backend
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
       retries: 3
 
   rabbitmq:
@@ -113,7 +108,6 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
       interval: 10s
-      timeout: 5s
       retries: 5
 
 networks:

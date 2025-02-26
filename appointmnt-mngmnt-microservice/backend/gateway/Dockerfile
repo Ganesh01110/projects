@@ -1,18 +1,19 @@
 # Use an official Node.js image
-FROM node:18
+FROM node:18-slim
 
 # Set working directory specific to the service
-WORKDIR /gateway
+WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy package.json and package-lock.json first to leverage Docker caching
 COPY package.json package-lock.json ./
-#RUN npm install --omit=dev
-RUN npm ci --omit=dev
 
-# Copy application files
-COPY . .
+# Install dependencies
+#RUN npm ci --omit=dev
+RUN npm install --only=prod
 
-ENV NODE_ENV=production
+
+# Copy compiled TypeScript files (dist/)
+COPY dist ./dist
 
 # Set environment variables from Docker Compose
 #ARG SERVICE_PORT

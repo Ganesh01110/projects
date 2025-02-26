@@ -1,8 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated/appointment-client"
-  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
-  //binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  output        = "./generated/appointment-client"
+  //binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,10 +10,10 @@ datasource db {
 }
 
 model appointment {
-  id        String @id @default(uuid())
-  userId    String
-  date      DateTime
-  status    String
+  id     String   @id @default(uuid())
+  userId String
+  date   DateTime
+  status String
 }
 
 model user {
@@ -33,112 +32,118 @@ model user_details {
   namdocument3 String
 }
 
-
-model Patient {
-  patientId                     Int      @id @default(autoincrement())
-  RegistrationNo                String   @unique
-  admission_date                DateTime?
-  department                    String?
-  id_no                         String?
-  admission_time                DateTime?
-  admission_type                AdmissionType @default(OPD)
-  PatientName                   String
-  Gender                        String
-  Age                           Int?
-  religion                      String?
-  GuardianName                  String?
-  phoneNo                       String?
-  JoinerName                    String?
-  JoinerphoneNo                 String?
-  RelationShip                  String?
-  Address                       String?
-  City                          String?
-  state                         String?
-  district                      String?
-  PostalCode                    String?
-  attending_doctor              String?
-  CabinNo                       String?
-  Status                        AdmissionType?
-  registration_date             DateTime @default(now())
-  Problems                      String?
-  Remarks                       String?
-  Notification_visibility       NotificationStatus @default(NotViewed)
-  Lab_Notification_visibility   NotificationStatus @default(NotViewed)
-  Pharma_Notification_visibility NotificationStatus @default(NotViewed)
-  discharge_date                DateTime?
-
-  admissions                    PatientAdmission[]
-  doctorMappings                PatientDoctorMapping[]
-  departmentHistory             PatientDepartmentHistory[]
-  doctorVisitHistory            DoctorPatientHistory[]
-}
-
-model PatientAdmission {
-  id              Int            @id @default(autoincrement())
-  patientId       Int
-  admission_type  AdmissionType
-  current_dept_type AdmissionType
-  admission_date  DateTime
-  discharge_date  DateTime?
-  current_status  Status
-
-  patient         Patient        @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
-}
-
-model PatientDoctorMapping {
-  mapping_id      Int            @id @default(autoincrement())
-  patientId       Int
-  doctor_id       String
-  department      AdmissionType?
-  role            DoctorRole
-  role_name       String?
-  consultation_date DateTime @default(now())
-  created_at      DateTime   @default(now())
-  updated_at      DateTime   @updatedAt
-  status          Status      @default(ACTIVE)
-
-  patient         Patient      @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
-  doctorVisits    DoctorVisit[]
-}
-
-model DoctorVisit {
-  visit_id         Int            @id @default(autoincrement())
-  mapping_id       Int
-  department       AdmissionType?
-  visit_datetime   DateTime       @default(now())
+model doctorpatienthistory {
+  visit_history_id     Int                             @id @default(autoincrement())
+  patientId            Int
+  doctorId             String
+  visit_datetime       DateTime
+  department           doctorpatienthistory_department @default(OPD)
   medicines_prescribed String?
-  remarks          String?
-  suggestions      String?
+  remarks              String?
+  suggestions          String?
+  doctor_fee           Decimal                         @db.Decimal(10, 2)
 
-  mapping          PatientDoctorMapping @relation(fields: [mapping_id], references: [mapping_id], onDelete: Cascade)
+  @@index([patientId], map: "DoctorPatientHistory_patientId_fkey")
 }
 
-model PatientDepartmentHistory {
-  history_id        Int            @id @default(autoincrement())
+model doctorvisit {
+  visit_id             Int                     @id @default(autoincrement())
+  mapping_id           Int
+  department           doctorvisit_department?
+  visit_datetime       DateTime                @default(now())
+  medicines_prescribed String?
+  remarks              String?
+  suggestions          String?
+
+  @@index([mapping_id], map: "DoctorVisit_mapping_id_fkey")
+}
+
+model medicine {
+  medicine_id     Int       @id @default(autoincrement())
+  medicine_name   String
+  hsn             String?
+  batch_no        String?
+  serial_no       String?
+  company_name    String?
+  expiry_date     DateTime?
+  pieces_per_unit Int?
+  mrp             Decimal?
+  purchase_price  Decimal?
+}
+
+model patient {
+  patientId                      Int                                    @id @default(autoincrement())
+  RegistrationNo                 String                                 @unique(map: "Patient_RegistrationNo_key")
+  admission_date                 DateTime?
+  department                     String?
+  id_no                          String?
+  admission_time                 DateTime?
+  admission_type                 patient_admission_type                 @default(OPD)
+  PatientName                    String
+  Gender                         String
+  Age                            Int?
+  religion                       String?
+  GuardianName                   String?
+  phoneNo                        String?
+  JoinerName                     String?
+  JoinerphoneNo                  String?
+  RelationShip                   String?
+  Address                        String?
+  City                           String?
+  state                          String?
+  district                       String?
+  PostalCode                     String?
+  attending_doctor               String?
+  CabinNo                        String?
+  Status                         patient_Status?
+  registration_date              DateTime                               @default(now())
+  Problems                       String?
+  Remarks                        String?
+  Notification_visibility        patient_Notification_visibility        @default(NotViewed)
+  Lab_Notification_visibility    patient_Lab_Notification_visibility    @default(NotViewed)
+  Pharma_Notification_visibility patient_Pharma_Notification_visibility @default(NotViewed)
+  discharge_date                 DateTime?
+}
+
+model patientadmission {
+  id                Int                                @id @default(autoincrement())
   patientId         Int
-  previous_department AdmissionType?
-  current_department AdmissionType?
-  transition_date   DateTime       @default(now())
-  remarks           String?
+  admission_type    patientadmission_admission_type
+  current_dept_type patientadmission_current_dept_type
+  admission_date    DateTime
+  discharge_date    DateTime?
+  current_status    patientadmission_current_status
 
-  patient          Patient         @relation(fields: [patientId], references: [patientId], onDelete: Cascade)
+  @@index([patientId], map: "PatientAdmission_patientId_fkey")
 }
 
-model DoctorPatientHistory {
-  visit_history_id Int            @id @default(autoincrement())
-  patientId        Int
-  doctorId         String
-  visit_datetime   DateTime
-  department       AdmissionType @default(OPD)
-  medicines_prescribed String?
-  remarks          String?
-  suggestions      String?
-  doctor_fee       Decimal @db.Decimal(10,2)
+model patientdepartmenthistory {
+  history_id          Int                                           @id @default(autoincrement())
+  patientId           Int
+  previous_department patientdepartmenthistory_previous_department?
+  current_department  patientdepartmenthistory_current_department?
+  transition_date     DateTime                                      @default(now())
+  remarks             String?
 
-  patient          Patient         @relation(fields: [patientId], references: [patientId])
+  @@index([patientId], map: "PatientDepartmentHistory_patientId_fkey")
 }
 
-enum AdmissionType {
+model patientdoctormapping {
+  mapping_id        Int                              @id @default(autoincrement())
+  patientId         Int
+  doctor_id         String
+  department        patientdoctormapping_department?
+  role              patientdoctormapping_role
+  role_name         String?
+  consultation_date DateTime                         @default(now())
+  created_at        DateTime                         @default(now())
+  updated_at        DateTime
+  status            patientdoctormapping_status      @default(ACTIVE)
+
+  @@index([patientId], map: "PatientDoctorMapping_patientId_fkey")
+}
+
+enum doctorvisit_department {
   OPD
   IPD
   OT
@@ -146,33 +151,98 @@ enum AdmissionType {
   DISCHARGED
 }
 
-enum NotificationStatus {
-  NotViewed
-  Viewed
+enum patientadmission_admission_type {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
 }
 
-enum DoctorRole {
+enum patientdepartmenthistory_previous_department {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patientadmission_current_dept_type {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patientdepartmenthistory_current_department {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patientdoctormapping_department {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum doctorpatienthistory_department {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patientdoctormapping_role {
   Consulting
   Attending
   Referral
   Other
 }
 
-enum Status {
+enum patient_admission_type {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patientadmission_current_status {
   ACTIVE
   DISCHARGED
 }
 
-model Medicine {
-  medicine_id      Int      @id @default(autoincrement())
-  medicine_name    String  
-  hsn             String?  
-  batch_no        String?  
-  serial_no       String?  
-  company_name    String?  
-  expiry_date     DateTime?  
-  pieces_per_unit Int?  
-  mrp             Decimal?  
-  purchase_price  Decimal?  
+enum patientdoctormapping_status {
+  ACTIVE
+  DISCHARGED
 }
 
+enum patient_Status {
+  OPD
+  IPD
+  OT
+  EMERGENCY
+  DISCHARGED
+}
+
+enum patient_Notification_visibility {
+  NotViewed
+  Viewed
+}
+
+enum patient_Lab_Notification_visibility {
+  NotViewed
+  Viewed
+}
+
+enum patient_Pharma_Notification_visibility {
+  NotViewed
+  Viewed
+}

@@ -1,46 +1,48 @@
-# Use an official Node.js image
+# Use Node.js as the base image
 FROM node:18-slim
 
-# Set working directory specific to the service
-WORKDIR /billing-service
+# Set working directory inside the container
+WORKDIR /app
 
-# Copy package.json and install dependencies
+# Install OpenSSL (Fix for Prisma)
+#RUN apt-get update -y && apt-get install -y openssl
+
+# Install required system dependencies (including MySQL client)
+RUN apt-get update -y && apt-get install -y openssl mariadb-client
+
+# Copy package.json and package-lock.json first to leverage Docker caching
 COPY package.json package-lock.json ./
-#RUN npm install --omit=dev
-RUN npm ci --omit=dev
 
+# Copy .env file
 COPY .env .env
 
-ENV NODE_ENV=production
+# Install dependencies
+#RUN npm ci --omit=dev
+#RUN npm install --only=prod
 
-# Copy application files
+
+# Copy compiled TypeScript files (dist/)
+#COPY dist ./dist
+
+# Copy proto files
+#COPY protos ./protos
+
+# Copy Prisma schema and migrations
+#COPY prisma ./prisma
+#COPY ./prisma/*.prisma ./prisma/
+
 COPY . .
 
-# pull migrate and generate the  prisma service
-#CMD ["npm", "generate:all"]
-#RUN npm run dbpull:all
-#RUN npm run migrate:all
-#RUN npm run generate:all
+#RUN npm ci --omit=dev
+RUN npm install
 
-# Set environment variables from Docker Compose
-#ARG SERVICE_PORT
-#ARG USER_PROTO_PORT
-#ARG APPOINTMENT_PROTO_PORT
+RUN npm run generate:all
 
-#ENV PORT=$SERVICE_PORT
-#ENV USER_PROTO_PORT=$USER_PROTO_PORT
-#ENV APPOINTMENT_PROTO_PORT=$APPOINTMENT_PROTO_PORT
-
-# Expose the port for this service
+# Expose necessary ports (adjust based on service)
 EXPOSE 3002 50051 50052
-#EXPOSE 3002 $PORT $USER_PROTO_PORT $APPOINTMENT_PROTO_PORT
 
 # Start the service
-#CMD ["npm", "start"]
-#CMD ["npm", "run", "dbpull:all"] && \
-#    ["npm", "run", "migrate:all"] && \
-#    ["npm", "run", "generate:all"] && \
-#    ["npm", "start"]
-
-CMD ["sh", "-c", "sleep 10 && npm run dbpull:all && npm run migrate:all && npm run generate:all && npm start"]
-
+#CMD ["sh", "-c", "sleep 10 && npm start"]
+#CMD ["sh", "-c", "sleep 10 && npm run dbpull:all && npm run migrate:all && npm run generate:all && npm start"]
+#CMD ["sh", "-c", "sleep 10 && npm run dbpull:all && npm run migrate:all && npm run generate:all && sleep 2 && npm start"]
+CMD ["sh", "-c", "sleep 10 && npm run dbpull:all && npm run migrate:all &&  sleep 2 && npm start"]

@@ -1,9 +1,11 @@
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import * as path from 'path';
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client';
+import { PrismaClient as AppointmentClient } from './../prisma/generated/appointment-client';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
+const AppointmentDB = new AppointmentClient();
 
 const PROTO_PATH = path.resolve(__dirname, '../protos/appointment.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -19,7 +21,7 @@ const appointmentProto = grpc.loadPackageDefinition(packageDefinition).Appointme
 const createAppointment = async (call: any, callback: any) => {
   const { userId, date, status } = call.request;
   try {
-    const appointment = await prisma.appointment.create({
+    const appointment = await AppointmentDB.appointment.create({
       data: { userId, date, status },
     });
     callback(null, appointment);
@@ -31,7 +33,7 @@ const createAppointment = async (call: any, callback: any) => {
 const getAppointment = async (call: any, callback: any) => {
   const { appointmentId } = call.request;
   try {
-    const appointment = await prisma.appointment.findUnique({ where: { id: appointmentId } });
+    const appointment = await AppointmentDB.appointment.findUnique({ where: { id: appointmentId } });
     callback(null, appointment || { error: "Appointment not found" });
   } catch (error) {
     callback(error, null);
@@ -51,7 +53,7 @@ const getPendingAppointments = async (call: any, callback: any) => {
 
     userId = String(userId);
     
-    const appointments = await prisma.appointment.findMany({
+    const appointments = await AppointmentDB.appointment.findMany({
       where: { userId, status: "scheduled" },
     });
     console.log("scheduled appointment serch",appointments);

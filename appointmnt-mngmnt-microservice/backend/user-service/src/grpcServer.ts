@@ -1,9 +1,12 @@
 import * as grpc from '@grpc/grpc-js';
 import * as path from "path";
 import * as protoLoader from '@grpc/proto-loader';
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client';
+import { PrismaClient as UserClient } from './../prisma/generated/user-client';
 
-const prisma = new PrismaClient();
+
+// const prisma = new PrismaClient();
+const UserDB = new UserClient();
 
 // const PROTO_PATH = './protos/user.proto';
 const PROTO_PATH = path.resolve(__dirname, "../protos/user.proto");
@@ -22,7 +25,7 @@ const userProto = grpc.loadPackageDefinition(packageDefinition).UserService as a
 const createUser = async (call: any, callback: any) => {
   const { name, email, password } = call.request;
   try {
-    const user = await prisma.user.create({ data: { name, email, password } });
+    const user = await UserDB.user.create({ data: { name, email, password } });
     callback(null, { id: user.id, message: 'User created successfully' });
   } catch (error) {
     callback(error, null);
@@ -32,7 +35,7 @@ const createUser = async (call: any, callback: any) => {
 const getUser = async (call: any, callback: any) => {
   const { id } = call.request;
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await UserDB.user.findUnique({ where: { id } });
     if (user) {
       callback(null, { id: user.id, name: user.name, email: user.email });
     } else {

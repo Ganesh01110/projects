@@ -6,10 +6,13 @@ services:
       context: ./user-service
     ports:
       - "3001:3001"
-      - "50051:50051"
     depends_on:
-      - redis
-      - rabbitmq
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - NODE_ENV=production
       - SERVICE_PORT=3001
@@ -17,13 +20,11 @@ services:
       - APPOINTMENT_PROTO_PORT=50052
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq
-      - APPOINTMENT_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem1
-      - USER_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem
-      - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
+      - USER_DATABASE_URL=mysql://root:root@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 10 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
 
   billing-service:
     build:
@@ -32,6 +33,7 @@ services:
       - "3002:3002"
     depends_on:
       - user-service
+      - mysql
       - redis
       - rabbitmq
     environment:
@@ -41,22 +43,20 @@ services:
       - APPOINTMENT_PROTO_PORT=50052
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq
-      - APPOINTMENT_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem1
-      - USER_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem
-      - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
+      - USER_DATABASE_URL=mysql://root:root@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 20 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
 
   appointment-service:
     build:
       context: ./appointment-service
     ports:
       - "3003:3003"
-      - "50052:50052"
     depends_on:
       - user-service
+      - mysql
       - redis
       - rabbitmq
     environment:
@@ -66,13 +66,11 @@ services:
       - APPOINTMENT_PROTO_PORT=50052
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq
-      - APPOINTMENT_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem1
-      - USER_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem
-      - BILLING_DATABASE_URL=mysql://root:@192.168.179.61:3306/prismahospitalmanagementsystem2
+      - USER_DATABASE_URL=mysql://root:root@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
     networks:
       - backend
-    restart: always  
-    command: sh -c "sleep 15 && npm run migrate:all && npm run generate:all && sleep 2 && npm start"
 
   gateway:
     build:
@@ -87,7 +85,24 @@ services:
       - NODE_ENV=production
     networks:
       - backend
-    restart: always  
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: PrismaHospitalManagementSystem
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
   redis:
     image: redis:latest
@@ -98,8 +113,7 @@ services:
       - backend
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
       retries: 3
 
   rabbitmq:
@@ -113,7 +127,6 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
       interval: 10s
-      timeout: 5s
       retries: 5
 
 networks:

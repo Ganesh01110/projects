@@ -12,8 +12,12 @@
     "setup:appointment": "cd appointment-service && npm install && npm run dbpull:all && npm run migrate:all && npm run generate:all && npm run build",
     "setup:gateway": "cd gateway && npm install && npm run build",
 
-    "setup:all": "npm run setup:user && npm run setup:billing && npm run setup:appointment && npm run setup:gateway"
-  },
+    "setup:all": "npm run setup:user && npm run setup:billing && npm run setup:appointment && npm run setup:gateway",
+    "generate:user": "cd user-service && npm run generate:all" ,
+    "generate:billing": "cd billing-service && npm run generate:all" ,
+    "generate:appointment": "cd appointment-service && npm run generate:all" ,
+    "generate:all": "npm run generate:user && npm run generate:billing && npm run generate:appointment" 
+   },
   "author": "ganesh sahu",
   "license": "ISC",
   "dependencies": {

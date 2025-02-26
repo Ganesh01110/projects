@@ -1,29 +1,15 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated/bill-client"
-  binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
-  //binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  output        = "./generated/bill-client"
+  //binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x"]
 }
-
-//datasource db {
-//  provider = "postgresql"
-//  url      = env("DATABASE_URL")
-//}
 
 datasource db {
   provider = "mysql"
   url      = env("BILLING_DATABASE_URL")
 }
 
-
-
-model Bill {
+model bill {
   id          Int      @id @default(autoincrement())
   patientId   Int
   amount      Float

@@ -32,3 +32,25 @@ docker logs -f appointment-service
 
 --curl from cmd
 curl -X GET http://localhost:3000/user
+
+-----
+for cmd
+
+rmdir /s /q node_modules\.prisma
+docker-compose down --volumes
+docker-compose up --build
+
+for powershell
+
+Remove-Item -Recurse -Force node_modules/.prisma
+docker-compose down --volumes
+docker-compose up --build
+
+
+---frontend--
+docker stop hms-fe
+docker rm hms-fe
+docker build -t hms-frontend .
+docker run -d -p 5173:80 --name hms-fe hms-frontend
+
+

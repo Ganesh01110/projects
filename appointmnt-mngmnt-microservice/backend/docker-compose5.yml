@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3001
+      - USER_PROTO_PORT=50051
+      - APPOINTMENT_PROTO_PORT=50052
+      - REDIS_URL="redis://redis-service:6379"
+      - RABBITMQ_URL="amqp://rabbitmq-service"
+      - USER_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
+    networks:
+      - backend
+
+  billing-service:
+    build:
+      context: ./billing-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy  
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3002
+      - USER_PROTO_PORT=50051
+      - APPOINTMENT_PROTO_PORT=50052
+      - REDIS_URL="redis://redis-service:6379"
+      - RABBITMQ_URL="amqp://rabbitmq-service"
+      - USER_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
+    networks:
+      - backend
+
+  appointment-service:
+    build:
+      context: ./appointment-service
+    ports:
+      - "3003:3003"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy  
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3003
+      - USER_PROTO_PORT=50051
+      - APPOINTMENT_PROTO_PORT=50052
+      - REDIS_URL="redis://redis-service:6379"
+      - RABBITMQ_URL="amqp://rabbitmq-service"
+      - USER_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem
+      - APPOINTMENT_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem1
+      - BILLING_DATABASE_URL=mysql://root:@mysql:3306/PrismaHospitalManagementSystem2
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      user-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+      appointment-service:
+        condition: service_started
+    environment:
+      - NODE_ENV=production
+    networks:
+      - backend
+
+
+  redis:
+    image: "redis:latest"
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 3
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      retries: 5
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local  

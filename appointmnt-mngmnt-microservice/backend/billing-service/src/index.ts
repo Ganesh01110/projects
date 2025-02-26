@@ -5,11 +5,19 @@ import dotenv from 'dotenv';
 import billRoutes from './billing.routes';
 import { connectQueue, consumeFromQueue } from "./queue";
 
+import { PrismaClient as UserClient } from './../prisma/generated/user-client';
+import { PrismaClient as AppointmentClient } from './../prisma/generated/appointment-client';
+import { PrismaClient as BillClient } from './../prisma/generated/bill-client';
+
+const UserDB = new UserClient();
+const AppointmentDB = new AppointmentClient();
+const BillingDB = new BillClient();
 
 
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// import { PrismaClient } from '@prisma/client';
+
+// const prisma = new PrismaClient();
 
 // const client = new Client({
 //   connectionString: process.env.DATABASE_URL
@@ -18,8 +26,10 @@ const prisma = new PrismaClient();
 
 async function checkConnection() {
     try {
-        await prisma.$connect();
-        console.log("✅ Database connected successfully");
+      await UserDB.$connect();
+      await AppointmentDB.$connect();
+      await BillingDB.$connect();
+      console.log("✅ Database connected successfully");
     } catch (error) {
         console.error("❌ Database connection failed:", error);
         process.exit(1);
