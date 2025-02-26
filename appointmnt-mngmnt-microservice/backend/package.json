@@ -4,6 +4,8 @@
   "description": "combined service",
   "main": "index.js",
   "scripts": {
+    "gitForgetCredential":"cmdkey /delete:git:https://github.com",
+    "gitForgetCredentialLinux":"git credential reject https://github.com",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"npm start --prefix user-service\" \"npm start --prefix billing-service\" \"npm start --prefix appointment-service\" \"npm start --prefix gateway\"",
     

@@ -145,6 +145,11 @@ docker-compose build
 docker-compose up -d
 ```
 
+### **or both in sinlge command (for pulling sql,redis and rabitmq image, building the network service and run)**
+```sh
+docker-compose up --build
+```
+
 ### **3️⃣ Stop Containers**
 ```sh
 docker-compose down
