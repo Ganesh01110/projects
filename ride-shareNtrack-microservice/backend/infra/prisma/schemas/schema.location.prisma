@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+  //output   = "../generated/location-client"
+  output   = "../../generated/location-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_LOCATION_URL")
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  userId      String   // Links location to a user (can be a driver or passenger)
+  latitude    Float
+  longitude   Float
+  coordinates Unsupported("geometry(Point, 4326)") // Storing GPS coordinates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([latitude, longitude]) // Ensure uniqueness of coordinates
+}
+

@@ -1,0 +1,252 @@
+version: '3.8'
+
+networks:
+  ride-network:
+    driver: bridge
+
+services:
+  # PostgreSQL Databases per Service
+  postgres-auth:
+    image: postgis/postgis
+    container_name: postgres-auth
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "auth_user"]
+      interval: 10s
+      retries: 5
+
+  postgres-user:
+    image: postgis/postgis
+    container_name: postgres-user
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      POSTGRES_USER: user_user
+      POSTGRES_PASSWORD: user_password
+      POSTGRES_DB: user_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user_user"]
+      interval: 10s
+      retries: 5
+
+  postgres-ride:
+    image: postgis/postgis
+    container_name: postgres-ride
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      POSTGRES_USER: ride_user
+      POSTGRES_PASSWORD: ride_password
+      POSTGRES_DB: ride_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_ride_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ride_user"]
+      interval: 10s
+      retries: 5
+
+  postgres-location:
+    image: postgis/postgis
+    container_name: postgres-location
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      POSTGRES_USER: location_user
+      POSTGRES_PASSWORD: location_password
+      POSTGRES_DB: location_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_location_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "location_user"]
+      interval: 10s
+      retries: 5
+
+  postgres-notification:
+    image: postgis/postgis
+    container_name: postgres-notification
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notification_password
+      POSTGRES_DB: notification_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_notification_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "notification_user"]
+      interval: 10s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    networks:
+      - ride-network
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+
+  # Zookeeper (Kafka dependency)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    restart: always
+    networks:
+      - ride-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      retries: 5
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    restart: always
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list"]
+      interval: 10s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    restart: always
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      DATABASE_URL: "postgresql://auth_user:auth_password@postgres-auth:5432/auth_db"
+      REDIS_HOST: "redis"
+    ports:
+      - "5001:5001"
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    restart: always
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      DATABASE_URL: "postgresql://user_user:user_password@postgres-user:5432/user_db"
+    ports:
+      - "5002:5002"
+
+  # Ride Service
+  ride-service:
+    build: ./services/ride-service
+    container_name: ride-service
+    restart: always
+    depends_on:
+      postgres-ride:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      DATABASE_URL: "postgresql://ride_user:ride_password@postgres-ride:5432/ride_db"
+      KAFKA_BROKER: "kafka:9092"
+    ports:
+      - "5003:5003"
+
+  # Location Service (PostGIS)
+  location-service:
+    build: ./services/location-service
+    container_name: location-service
+    restart: always
+    depends_on:
+      postgres-location:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      DATABASE_URL: "postgresql://location_user:location_password@postgres-location:5432/location_db"
+      REDIS_HOST: "redis"
+    ports:
+      - "5004:5004"
+
+  # Notification Service
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    restart: always
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      DATABASE_URL: "postgresql://notification_user:notification_password@postgres-notification:5432/notification_db"
+      KAFKA_BROKER: "kafka:9092"
+    ports:
+      - "5005:5005"
+
+volumes:
+  postgres_auth_data:
+  postgres_user_data:
+  postgres_ride_data:
+  postgres_location_data:
+  postgres_notification_data:
+  redis_data:

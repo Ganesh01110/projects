@@ -1,0 +1,18 @@
+// Auto-merged Prisma Schema 
+// infra/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Importing other schema files
+import "schemas/schema.auth.prisma"
+import "schemas/schema.user.prisma"
+import "schemas/schema.ride.prisma"
+import "schemas/schema.location.prisma"
+import "schemas/schema.notification.prisma"

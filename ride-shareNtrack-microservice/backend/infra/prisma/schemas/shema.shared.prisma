@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../generated/shared-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_SHARED_URL")  // Use a shared DB connection
+}
+
+model User {
+  id        String  @id @default(uuid())
+  name      String
+  email     String  @unique
+  phone     String?
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  rides         Ride[]
+  notifications Notification[]
+  payment       Transaction[]
+}

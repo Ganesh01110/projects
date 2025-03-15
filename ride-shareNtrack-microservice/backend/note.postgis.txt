@@ -1,0 +1,146 @@
+🚀 Step 1: Pull PostgreSQL with PostGIS
+Run the following command to pull the PostGIS-enabled PostgreSQL image from Docker Hub:
+
+
+docker pull postgis/postgis
+This ensures that your PostgreSQL instance supports geospatial queries.
+
+🚀 Step 2: Run PostgreSQL with PostGIS
+Run the following command in Command Prompt (cmd) to start a PostgreSQL container:
+
+
+docker run -d --name postgres-postgis ^
+  -e POSTGRES_USER=admin ^
+  -e POSTGRES_PASSWORD=adminpassword ^
+  -e POSTGRES_DB=ridesharing ^
+  -p 5432:5432 ^
+  postgis/postgis
+
+🔹 Explanation of Flags:
+
+-d → Runs in detached mode (background).
+--name postgres-postgis → Names the container.
+-e POSTGRES_USER=admin → Sets username.
+-e POSTGRES_PASSWORD=adminpassword → Sets password.
+-e POSTGRES_DB=ridesharing → Creates the initial database.
+-p 5432:5432 → Exposes PostgreSQL on port 5432.
+postgis/postgis → Uses the PostGIS-enabled PostgreSQL image.
+🚀 Step 3: Verify if PostgreSQL is Running
+Run:
+
+
+docker ps
+You should see a running container named postgres-postgis.
+
+🚀 Step 4: Connect to PostgreSQL
+To connect inside the container, run:
+
+
+docker exec -it postgres-postgis psql -U admin -d ridesharing
+🔹 This logs you into PostgreSQL.
+
+Now, enable PostGIS:
+
+
+CREATE EXTENSION postgis;
+This enables geospatial functions inside your database.
+
+🚀 Step 5: Set Up Prisma for PostgreSQL
+1️⃣ Inside your .env file, update your Prisma Database URL:
+
+
+DATABASE_URL="postgresql://admin:adminpassword@localhost:5432/ridesharing?schema=public"
+2️⃣ Run Prisma migration:
+
+
+npx prisma migrate dev --name init_location
+🚀 Step 6: Stopping & Restarting PostgreSQL
+To stop PostgreSQL:
+
+
+docker stop postgres-postgis
+To restart PostgreSQL:
+
+
+docker start postgres-postgis
+To remove PostgreSQL completely:
+
+
+docker rm -f postgres-postgis
+🚀 Step 7: (Optional) Add to docker-compose.yml
+If you want to manage everything via docker-compose, create a docker-compose.yml file:
+
+
+version: '3.8'
+services:
+  postgres:
+    image: postgis/postgis
+    container_name: postgres-postgis
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: ridesharing
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+Then, start the database using:
+
+
+docker-compose up -d
+Final Steps
+✅ PostgreSQL with PostGIS is set up in Docker.
+✅ PostGIS is enabled in the database.
+✅ Prisma is connected to PostgreSQL.
+
+
+----------------------
+individual db connection
+
+docker exec -it postgres-postgis psql -U admin -d ridesharing
+
+ docker exec -it postgres-postgis psql -U payment_user -d payment_db
+
+  docker exec -it postgres-postgis psql -U location_user -d location_db
+
+  CREATE EXTENSION IF NOT EXISTS postgis; if error like this shows up 
+  "permission denied to create extension "postgis"
+HINT:  Must be superuser to create this extension."
+
+  with admin validation add postgis extension to location
+  docker exec -it postgres-postgis psql -U admin -d location_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+
+ ---------------------
+
+ docker stop postgres-postgis && docker rm postgres-postgis
+docker run -d --name postgres-postgis -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=adminpassword -e POSTGRES_DB=postl̥gres -p 5432:5432 postgis/postgis
+
+
+------------------------------------------
+flow of db like
+
+npm run generate:all
+
+install post gres-postgis
+
+npm run start-db
+
+npm run init-db
+
+docker exec -it postgres-postgis psql -U admin -d location_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+run above for accessing location with postgis
+
+npm run migrate:all
+
+if problem 
+
+npm run reset:all
+
+manually delete all migration files and try again
+
+------------------------------------------

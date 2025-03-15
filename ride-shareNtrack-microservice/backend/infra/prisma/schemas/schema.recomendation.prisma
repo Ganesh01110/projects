@@ -1,0 +1,18 @@
+generator client {
+  provider = "mongodb"
+  url      = env("POSTGRES_RECOMENDATION_URL")
+}
+
+model RideHistory {
+  id         String @id @default(auto()) @map("_id")
+  userId     String
+  rideData   Json
+  createdAt  DateTime @default(now())
+}
+
+model DriverRating {
+  id        String @id @default(auto()) @map("_id")
+  driverId  String
+  ratings   Json
+  createdAt DateTime @default(now())
+}

@@ -3,6 +3,7 @@ node_modules/
 
 #ignoring prisma config
 prisma/generated/
+infra/prisma/migrations/
 prisma/query_engine*
 prisma/*.dll
 prisma/*.node

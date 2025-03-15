@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "CommonJS",
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "strict": true,
+      "esModuleInterop": true,
+      "baseUrl": "../../",  // Navigate two levels up to the root
+      "paths": {
+        "@prisma/auth-client": ["generated/auth-client"],
+        "@prisma/user-client": ["generated/user-client"],
+        "@prisma/ride-client": ["generated/ride-client"],
+        "@prisma/location-client": ["generated/location-client"],
+        "@prisma/notification-client": ["generated/notification-client"],
+        "@prisma/payment-client": ["generated/payment-client"],
+        "@prisma/recomendation-client": ["generated/recomendation-client"]
+      }
+    }
+  }
+  

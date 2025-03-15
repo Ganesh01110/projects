@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../generated/user-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_USER_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  rides Ride[]
+  // notifications Notification[]
+  // payment       Transaction[]
+}
+
+model Ride {
+  id        String     @id @default(uuid())
+  userId    String
+  driverId  String?
+  status    RideStatus @default(PENDING)
+  pickup    String
+  dropoff   String
+  fare      Float
+  createdAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Use shared User model
+}
+
+enum RideStatus {
+  PENDING
+  ONGOING
+  COMPLETED
+  CANCELED
+}

@@ -1,0 +1,67 @@
+{
+    "name": "ride-sharentrack-microservice",
+    "version": "1.0.0",
+    "main": "index.js",
+    "private": true,
+    "workspaces": [
+      "services/*",
+      "gateway"
+    ],
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "dev": "turbo run dev --parallel",
+      "build": "turbo run build",
+      "start": "turbo run start",
+      "generate:auth": "prisma generate --schema=infra/prisma/schemas/schema.auth.prisma",
+      "generate:user": "prisma generate --schema=infra/prisma/schemas/schema.user.prisma",
+      "generate:ride": "prisma generate --schema=infra/prisma/schemas/schema.ride.prisma",
+      "generate:location": "prisma generate --schema=infra/prisma/schemas/schema.location.prisma",
+      "generate:notification": "prisma generate --schema=infra/prisma/schemas/schema.notification.prisma",
+      "generate:payment": "prisma generate --schema=infra/prisma/schemas/schema.payment.prisma",
+      "generate:recomendation": "prisma generate --schema=infra/prisma/schemas/schema.recomendation.prisma",
+      "generate:shared": "prisma generate --schema=infra/prisma/schemas/schema.shared.prisma",
+
+      "generate:all": "npm run generate:auth && npm run generate:user && npm run generate:ride && npm run generate:location && npm run generate:notification && npm run generate:payment ",
+      "generate:all1": "npm run generate:auth && npm run generate:user && npm run generate:ride && npm run generate:location && npm run generate:notification && npm run generate:payment  && npm run generate:recomendation && npm run generate:shared",
+
+      "migrate:all": "npx prisma migrate dev --name update_payment --schema=infra/prisma/schemas/schema.payment.prisma && npx prisma migrate dev --name update_user --schema=infra/prisma/schemas/schema.user.prisma && npx prisma migrate dev --name update_notification --schema=infra/prisma/schemas/schema.notification.prisma && npx prisma migrate dev --name update_ride --schema=infra/prisma/schemas/schema.ride.prisma && npx prisma migrate dev --name update_auth --schema=infra/prisma/schemas/schema.auth.prisma && npx prisma migrate dev --name update_location --schema=infra/prisma/schemas/schema.location.prisma",
+
+      "reset:all": "npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.payment.prisma && npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.user.prisma && npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.notification.prisma && npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.ride.prisma && npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.auth.prisma && npx prisma migrate reset --force --schema=infra/prisma/schemas/schema.location.prisma ",
+
+      "start-db": "docker run -d --name postgres-postgis -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=adminpassword -e POSTGRES_DB=ridesharing -p 5432:5432 -v $(pwd)/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql postgis/postgis",
+
+      "init-db1": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d ridesharing -f /init-databases.sql",
+      "init-db2": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d postgres -f /init-databases.sql",
+      "init-db": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d postgres -f /init-databases.sql",
+      
+      "dev1": "concurrently \"npm run dev --prefix services/auth-service\" \"npm run dev --prefix services/user-service\" \"npm run dev --prefix services/ride-service\" \"npm run dev --prefix services/location-service\" \"npm run dev --prefix services/notification-service\" \"npm run dev --prefix gateway\"",
+      "build1": "concurrently \"npm run build --prefix services/auth-service\" \"npm run build --prefix services/user-service\" \"npm run build --prefix services/ride-service\" \"npm run build --prefix services/location-service\" \"npm run build --prefix services/notification-service\" \"npm run build --prefix gateway\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+      "@types/cors": "^2.8.17",
+      "@types/dotenv": "^6.1.1",
+      "@types/express": "^5.0.0",
+      "@types/node": "^22.13.10",
+      "concurrently": "^8.0.0",
+      "nodemon": "^3.1.9",
+      "ts-node": "^10.9.2",
+      "turbo": "^1.13.4",
+      "typescript": "^5.8.2"
+    },
+    "dependencies": {
+      "@grpc/grpc-js": "^1.13.0",
+      "@prisma/client": "^6.5.0",
+      "cors": "^2.8.5",
+      "dotenv": "^16.4.7",
+      "express": "^4.21.2",
+      "helmet": "^8.0.0",
+      "kafkajs": "^2.2.4",
+      "prisma": "^6.5.0",
+      "redis": "^4.7.0"
+    }
+  }
+  

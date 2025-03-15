@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../generated/payment-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PAYMENT_URL")
+}
+
+model Transaction {
+  id        String        @id @default(uuid())
+  userId    String
+  rideId    String
+  amount    Float
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  // Relations
+  // user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}

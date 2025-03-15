@@ -1,0 +1,281 @@
+# Microservices Project Setup Guide
+
+## 1. **Project Initialization**
+### **1.1 Folder Structure**
+```
+ride-shareNtrack-microservice/
+├── backend/
+│   ├── services/
+│   │   ├── auth-service/
+│   │   ├── user-service/
+│   │   ├── ride-service/
+│   │   ├── payment-service/
+│   │   └── notification-service/
+│   ├── shared/
+│   └── package.json
+├── frontend/
+└── turbo.json
+```
+
+### **1.2 Initialize TurboRepo**
+```sh
+npx create-turbo@latest
+```
+> This command initializes TurboRepo, a monorepo tool for managing multiple services efficiently.
+
+### **1.3 Install Turbo in the Monorepo**
+```sh
+npm install turbo --save-dev
+```
+
+### **1.4 Configure `turbo.json`**
+Create a `turbo.json` file at the root:
+```json
+{
+  "pipeline": {
+    "build": {},
+    "dev": {
+      "dependsOn": ["^dev"],
+      "parallel": true
+    }
+  }
+}
+```
+
+### **1.5 Setup Each Microservice**
+Inside `backend/services`, initialize each microservice:
+```sh
+cd backend/services/auth-service
+npm init -y
+```
+Repeat for `user-service`, `ride-service`, etc.
+
+### **1.6 Install Dependencies for Each Service**
+For a TypeScript-based Node.js microservice:
+```sh
+npm install express dotenv cors helmet pino
+npm install --save-dev typescript ts-node nodemon @types/express @types/node
+```
+
+### **1.7 Setup TypeScript (`tsconfig.json`)**
+```json
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "CommonJS",
+    "target": "ES6",
+    "strict": true
+  }
+}
+```
+
+### **1.8 Configure Nodemon (`nodemon.json`)**
+```json
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "exec": "ts-node src/index.ts"
+}
+```
+
+### **1.9 Add Scripts to `package.json`**
+```json
+"scripts": {
+  "dev": "nodemon",
+  "build": "tsc"
+}
+```
+
+## 2. **Running the Project**
+### **2.1 Start Services with Turbo**
+```sh
+npm run dev
+```
+
+### **2.2 Start an Individual Service**
+```sh
+cd backend/services/auth-service
+npm run dev
+```
+
+## 3. **Common Issues and Fixes**
+### **3.1 Fixing 'MODULE_NOT_FOUND'**
+```sh
+npx tsc # Compile TypeScript
+npx ts-node src/index.ts # Run TypeScript without compiling
+```
+
+### **3.2 Fixing 'rootDir' Issue in TypeScript**
+Ensure `tsconfig.json` has:
+```json
+"rootDir": "./src"
+```
+
+## 4. **Adding More Microservices**
+Repeat the steps for any new service by creating a new folder inside `backend/services/` and setting up `package.json`, `tsconfig.json`, and `nodemon.json`.
+
+---
+
+This document serves as a reference for setting up and running the microservices efficiently. 🚀
+
+
+
+
+
+----------------------------------
+docker image setup for redis, kafka-zookeeper
+
+----
+Corrected Commands for Windows CMD
+1️⃣ Start Zookeeper
+
+docker run -d --name zookeeper ^
+  -p 2181:2181 ^
+  -e ALLOW_ANONYMOUS_LOGIN=yes ^
+  bitnami/zookeeper:latest
+
+
+2️⃣ Start Kafka
+
+docker run -d --name kafka ^
+  -p 9092:9092 ^
+  -e KAFKA_BROKER_ID=1 ^
+  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 ^
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 ^
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 ^
+  --network="host" ^
+  bitnami/kafka:latest
+
+
+  if not work then remove both and folow below Commands
+
+  docker network create kafka-network && ^
+docker run -d --name zookeeper ^
+  --network=kafka-network ^
+  -p 2181:2181 ^
+  -e ALLOW_ANONYMOUS_LOGIN=yes ^
+  bitnami/zookeeper:latest && ^
+docker run -d --name kafka ^
+  --network=kafka-network ^
+  -p 9092:9092 ^
+  -e KAFKA_BROKER_ID=1 ^
+  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 ^
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 ^
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 ^
+  bitnami/kafka:latest
+
+
+
+3️⃣ Start Redis
+
+docker run -d --name redis -p 6379:6379 redis:latest
+To Check Running Containers
+
+docker ps
+
+To Open Redis CLI
+
+docker exec -it redis redis-cli
+
+To List Kafka Topics
+
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+
+
+4 start postgres/postgis
+
+docker pull postgis/postgis
+
+
+docker run -d --name postgres-postgis ^
+  -e POSTGRES_USER=admin ^
+  -e POSTGRES_PASSWORD=adminpassword ^
+  -e POSTGRES_DB=ridesharing ^
+  -p 5432:5432 ^
+  postgis/postgis
+
+
+---------------------
+Commands to Run Kafka, Zookeeper, and Redis (Without Re-downloading Images)
+1️⃣ Start Zookeeper (If not running already)
+
+docker start zookeeper || docker run -d --name zookeeper ^
+  -p 2181:2181 ^
+  -e ALLOW_ANONYMOUS_LOGIN=yes ^
+  bitnami/zookeeper:latest
+
+2️⃣ Start Kafka
+
+docker start kafka || docker run -d --name kafka ^
+  -p 9092:9092 ^
+  -e KAFKA_BROKER_ID=1 ^
+  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 ^
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 ^
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 ^
+  --network="host" ^
+  bitnami/kafka:latest
+
+3️⃣ Start Redis
+
+docker start redis || docker run -d --name redis -p 6379:6379 redis:latest
+
+Checking Status & Interacting
+✅ Check Running Containers
+
+docker ps
+✅ Connect to Kafka Container & List Topics
+
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+✅ Access Redis CLI
+
+docker exec -it redis redis-cli
+
+---------------------------
+Role of .turbo Folder
+The .turbo folder is created when using TurboRepo and contains two important subdirectories:
+
+cookie Folder
+
+Stores metadata about Turbo's execution, including task hashes.
+Helps determine if a task needs to be re-run or if it can use cached results.
+Not necessary to commit since it gets regenerated.
+daemon Folder
+
+Holds information about Turbo’s background process (daemon) to speed up task execution.
+Turbo's daemon keeps track of task dependencies and runs incremental builds.
+Should not be committed because it's specific to local execution.
+
+
+--------------------------------
+
+Final Answer for Your Project
+Your structure is Monorepo + Microservices ✅
+
+You are keeping all microservices in one Git repo (monorepo ✅).
+Each microservice is independent and deployable separately (microservices ✅).
+Prisma is centralized, but each service only accesses relevant models.
+Deployment is still microservices-based, even though the code is stored in one place.
+
+
+
+
+
+-----------------------------------
+
+
+-----------------------------
+
+npm install @prisma/client prisma
+
+ Step 1: Create Required Directories
+
+mkdir infra\prisma\schemas
+📌 Step 2: Create Individual Schema Files
+
+echo. > infra\prisma\schemas\schema.auth.prisma
+echo. > infra\prisma\schemas\schema.user.prisma
+echo. > infra\prisma\schemas\schema.ride.prisma
+echo. > infra\prisma\schemas\schema.location.prisma
+echo. > infra\prisma\schemas\schema.notification.prisma
+🔹 This will work because now the infra/prisma/schemas directory exists.
