@@ -33,7 +33,7 @@
       "init-db1": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d ridesharing -f /init-databases.sql",
       "init-db2": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d postgres -f /init-databases.sql",
       "init-db": "docker cp init-databases.sql postgres-postgis:/init-databases.sql && docker exec -it postgres-postgis psql -U admin -d postgres -f /init-databases.sql",
-      
+
       "dev1": "concurrently \"npm run dev --prefix services/auth-service\" \"npm run dev --prefix services/user-service\" \"npm run dev --prefix services/ride-service\" \"npm run dev --prefix services/location-service\" \"npm run dev --prefix services/notification-service\" \"npm run dev --prefix gateway\"",
       "build1": "concurrently \"npm run build --prefix services/auth-service\" \"npm run build --prefix services/user-service\" \"npm run build --prefix services/ride-service\" \"npm run build --prefix services/location-service\" \"npm run build --prefix services/notification-service\" \"npm run build --prefix gateway\""
     },
@@ -45,6 +45,7 @@
       "@types/cors": "^2.8.17",
       "@types/dotenv": "^6.1.1",
       "@types/express": "^5.0.0",
+      "@types/express-http-proxy": "^1.6.6",
       "@types/node": "^22.13.10",
       "concurrently": "^8.0.0",
       "nodemon": "^3.1.9",
@@ -61,7 +62,8 @@
       "helmet": "^8.0.0",
       "kafkajs": "^2.2.4",
       "prisma": "^6.5.0",
-      "redis": "^4.7.0"
+      "redis": "^4.7.0",
+      "express-http-proxy": "^2.1.1"
     }
   }
   

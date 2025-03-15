@@ -1,11 +1,16 @@
 {
     "compilerOptions": {
-      "target": "ES6",
-      "module": "CommonJS",
       "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true
-    }
+      "module": "CommonJS",
+      "target": "ES6",
+      "moduleResolution": "Node",
+      "baseUrl": "./",
+      "paths": {
+        "@infra/*": ["infra/*"],  // Optional alias
+        "@services/*": ["src/services/*"]
+      }
+    },
+    "include": ["src", "infra"],  // Add infra directory here
+    "exclude": ["node_modules"]
   }
   
