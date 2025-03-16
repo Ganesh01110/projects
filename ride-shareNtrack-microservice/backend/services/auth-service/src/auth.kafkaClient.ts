@@ -1,4 +1,9 @@
 import { Kafka, Producer, Consumer } from "kafkajs";
+import { PrismaClient } from "../../../infra/generated/auth-client";
+
+
+
+const authClient = new PrismaClient();
 
 const kafka = new Kafka({ clientId: "auth-service", brokers: ["kafka:9092"] });
 
@@ -13,6 +18,32 @@ export const connectKafka = async () => {
   await consumer.subscribe({ topics: ["user-registered", "forgot-password"], fromBeginning: false });
 
   console.log("✅ Kafka Consumer subscribed to topics: user-registered, forgot-password");
+
+  // for updating user emmitted from user service
+  await consumer.connect();
+  await consumer.subscribe({ topic: "user-updated", fromBeginning: false });
+
+  console.log("Auth Service Kafka Consumer subscribed to user-updated topic");
+
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message }) => {
+      if (message.value) {
+        const userData = JSON.parse(message.value.toString());
+        console.log(`Received user update: ${JSON.stringify(userData)}`);
+
+        // Update Auth DB
+        await authClient.user.update({
+          where: { id: userData.id },
+          data: {
+            name: userData.name,
+            email: userData.email,
+          },
+        });
+
+        console.log(`Auth DB updated for user: ${userData.email}`);
+      }
+    },
+  });
 };
 
 // Publish an event when a user registers

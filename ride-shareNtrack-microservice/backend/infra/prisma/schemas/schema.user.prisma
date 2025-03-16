@@ -17,7 +17,7 @@ model User {
   createdAt DateTime @default(now())
 
   // Relations
-  rides Ride[]
+  rides Ride[] @relation(name: "UserRides")
   // notifications Notification[]
   // payment       Transaction[]
 }
