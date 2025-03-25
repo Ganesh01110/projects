@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package location;
+
+// Request message for finding nearest drivers
+message FindNearestDriversRequest {
+  double latitude = 1;  // Latitude of the location
+  double longitude = 2; // Longitude of the location
+  double radius = 3;    // Search radius in meters
+}
+
+// Response message containing a list of nearby drivers
+message FindNearestDriversResponse {
+  repeated Driver drivers = 1; // List of nearby drivers
+}
+
+// Driver message representing a single driver
+message Driver {
+  string id = 1;        // Unique identifier for the driver
+  double latitude = 2;  // Latitude of the driver's location
+  double longitude = 3; // Longitude of the driver's location
+  double distance = 4;  // Distance from the search location (optional)
+}
+
+// Service definition for LocationService
+service LocationService {
+  rpc FindNearestDrivers (FindNearestDriversRequest) returns (FindNearestDriversResponse);
+}

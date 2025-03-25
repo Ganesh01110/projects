@@ -21,6 +21,12 @@ export const updateRideStatus = async (rideId: string, status: RideStatus) => {
   });
 };
 
+export const getRideById = async (rideId: string) => {
+  return prisma.ride.findUnique({
+    where: { id: rideId },
+  });
+};
+
 // import prisma from "../prisma/client";
 
 export const processPayment = async (userId: string, rideId: string, amount: number, method: string) => {

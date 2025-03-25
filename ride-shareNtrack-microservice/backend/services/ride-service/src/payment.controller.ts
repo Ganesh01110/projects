@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { processPayment } from "../services/payment.service";
-import { publishPaymentEvent } from "../kafka/payment.kafkaClient";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { processPayment } from "./ride.services";
+import { publishPaymentEvent } from "./ride.kafkaClient";
+import { AuthRequest } from "./ride.middlewares";
 
 export const makePayment = async (req: AuthRequest, res: Response) => {
   try {

@@ -1,7 +1,7 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { LocationService } from "./proto/location_grpc_pb";
 import { FindNearestDriversRequest, FindNearestDriversResponse } from "./proto/location_pb";
-import { getNearbyDrivers } from "../services/location.service";
+import { getNearbyDrivers } from "./location.service";
 
 const findNearestDrivers = async (call: any, callback: any) => {
   const { latitude, longitude, radius } = call.request;

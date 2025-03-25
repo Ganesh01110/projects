@@ -1,4 +1,5 @@
 import { Kafka, Producer, Consumer } from "kafkajs";
+import { io } from "./ride.WSClient";
 
 const kafka = new Kafka({ clientId: "ride-service", brokers: ["kafka:9092"] });
 
@@ -7,9 +8,12 @@ const consumer: Consumer = kafka.consumer({ groupId: "ride-events-group" });
 
 export const connectKafka = async () => {
   await producer.connect();
+  console.log("✅Kafka Producer connected");
   await consumer.connect();
 
   await consumer.subscribe({ topic: "location-updated", fromBeginning: false });
+  console.log("📢 Kafka Consumer subscribed to location-updated topic");
+
 
   consumer.run({
     eachMessage: async ({ topic, message }) => {
@@ -20,7 +24,7 @@ export const connectKafka = async () => {
     },
   });
 
-  console.log("Kafka connected for ride-service");
+  console.log("📢Kafka connected for ride-service");
 };
 
 export const publishRideEvent = async (event: string, data: any) => {
@@ -28,7 +32,7 @@ export const publishRideEvent = async (event: string, data: any) => {
     topic: event,
     messages: [{ value: JSON.stringify(data) }],
   });
-  console.log(`Published event ${event}`);
+  console.log(`📢Published event ${event}`);
 };
 
 export const publishPaymentEvent = async (eventType: string, paymentData: any) => {
@@ -36,4 +40,5 @@ export const publishPaymentEvent = async (eventType: string, paymentData: any) =
       topic: "payment-events",
       messages: [{ key: eventType, value: JSON.stringify(paymentData) }],
     });
+    console.log(`📢Published payment-success event for ${paymentData}`);
   };

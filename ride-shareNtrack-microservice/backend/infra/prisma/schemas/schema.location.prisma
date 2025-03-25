@@ -21,3 +21,16 @@ model Location {
   @@unique([latitude, longitude]) // Ensure uniqueness of coordinates
 }
 
+
+model DriverLocation {
+  id          String   @id @default(uuid())
+  driverId    String   @unique
+  latitude    Float
+  longitude   Float
+  coordinates Unsupported("geometry(Point, 4326)") // Storing GPS coordinates
+  lastUpdated DateTime @updatedAt
+
+  @@index([coordinates], map: "driver_location_gist") // PostGIS spatial index
+}
+
+

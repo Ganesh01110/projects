@@ -17,19 +17,19 @@ export const connectKafka = async () => {
   await consumer.connect();
   await consumer.subscribe({ topics: ["user-registered", "forgot-password"], fromBeginning: false });
 
-  console.log("✅ Kafka Consumer subscribed to topics: user-registered, forgot-password");
+  console.log("📢 Kafka Consumer subscribed to topics: user-registered, forgot-password");
 
   // for updating user emmitted from user service
   await consumer.connect();
   await consumer.subscribe({ topic: "user-updated", fromBeginning: false });
 
-  console.log("Auth Service Kafka Consumer subscribed to user-updated topic");
+  console.log("📢Auth Service Kafka Consumer subscribed to user-updated topic");
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       if (message.value) {
         const userData = JSON.parse(message.value.toString());
-        console.log(`Received user update: ${JSON.stringify(userData)}`);
+        console.log(`📢Received user update: ${JSON.stringify(userData)}`);
 
         // Update Auth DB
         await authClient.user.update({
@@ -40,7 +40,7 @@ export const connectKafka = async () => {
           },
         });
 
-        console.log(`Auth DB updated for user: ${userData.email}`);
+        console.log(`📢Auth DB updated for user: ${userData.email}`);
       }
     },
   });

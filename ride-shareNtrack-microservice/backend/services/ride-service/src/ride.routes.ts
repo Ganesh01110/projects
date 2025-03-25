@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { requestRide, acceptRide, updateRide } from "../controllers/ride.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { requestRide, acceptRide, updateRide } from "./ride.controller";
+import { authMiddleware } from "./ride.middlewares";
 import { makePayment } from "./payment.controller";
 
 const router = Router();

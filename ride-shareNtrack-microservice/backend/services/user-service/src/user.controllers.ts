@@ -36,7 +36,7 @@ export const updateUserProfile = async (req: AuthRequest, res: Response) => {
     }
 
     const userId = req.user.id;
-    const { name, bio } = req.body;
+    const { name, bio , phone , email } = req.body;
 
     const updatedUser = await updateUser(userId, { name, phone , email });
 

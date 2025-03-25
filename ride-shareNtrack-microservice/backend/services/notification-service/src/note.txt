@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../generated/notification-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_NOTIFICATION_URL")
+}
+
+model Notification {
+  id            String             @id @default(uuid())
+  userId        String             @index
+  message       String
+  type          NotificationType
+  channel       NotificationChannel
+  priority      NotificationPriority
+  read          Boolean            @default(false)
+  deliveryStatus NotificationStatus @default(PENDING)
+  createdAt     DateTime           @default(now())
+
+  @@index([priority, createdAt])  // Optimized querying for priority-based queue
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { updateDriverLocation, getNearbyDrivers } from "../services/location.service";
-import { publishLocationEvent } from "../kafka/location.kafkaClient";
-import { io } from "../websockets";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { updateDriverLocation, getNearbyDrivers } from "./location.service";
+import { publishLocationEvent } from "./locations.kafkaClient";
+import { io } from "./location.WSClient";
+import { AuthRequest } from "./location.middlewares";
 
 export const updateLocation = async (req: AuthRequest, res: Response) => {
   try {

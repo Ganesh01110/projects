@@ -11,5 +11,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@grpc/proto-loader": "^0.7.13",
+    "grpc-tools": "^1.13.0",
+    "protoc-gen-grpc": "^3.0.0",
+    "protoc-gen-ts": "^0.8.7",
+    "ts-proto": "^2.6.1"
+  }
 }

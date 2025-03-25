@@ -279,3 +279,60 @@ echo. > infra\prisma\schemas\schema.ride.prisma
 echo. > infra\prisma\schemas\schema.location.prisma
 echo. > infra\prisma\schemas\schema.notification.prisma
 🔹 This will work because now the infra/prisma/schemas directory exists.
+
+
+
+-----------------------------------------------
+
+To compile the .proto file using the protoc compiler with the appropriate plugins for TypeScript and gRPC, follow these steps:
+
+1. Install Required Dependencies
+Make sure you have the necessary dependencies installed in your project. Run the following commands in your terminal:
+
+npm install --save-dev grpc-tools @grpc/proto-loader ts-proto
+npm install --save-dev protoc-gen-ts protoc-gen-grpc
+
+2. Install protoc Compiler
+If you don't already have the protoc compiler installed, download it from the Protocol Buffers GitHub releases page. Choose the version for your operating system, extract it, and add the protoc binary to your system's PATH.
+
+3. Prepare the .proto File
+Ensure your .proto file (e.g., location.proto) is saved in the appropriate directory (e.g., src/proto).
+
+4. Run the protoc Command
+Run the following command in your terminal to generate the TypeScript and gRPC files:
+
+npx protoc \
+  --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts \
+  --js_out=import_style=commonjs,binary:./src/proto \
+  --ts_out=./src/proto \
+  --grpc_out=./src/proto \
+  ./src/proto/location.proto
+
+
+5. Explanation of the Command
+npx protoc: Runs the protoc compiler.
+--plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts: Specifies the TypeScript plugin for protoc.
+--js_out=import_style=commonjs,binary:./src/proto: Generates JavaScript files in CommonJS format.
+--ts_out=./src/proto: Generates TypeScript definitions for the .proto file.
+--grpc_out=./src/proto: Generates gRPC service stubs.
+./src/proto/location.proto: Specifies the path to the .proto file.
+
+
+6. Verify the Generated Files
+After running the command, you should see the following files in the src/proto directory:
+
+location_pb.js: JavaScript file for the .proto definitions.
+location_pb.d.ts: TypeScript definitions for the .proto file.
+location_grpc_pb.js: JavaScript file for the gRPC service stubs.
+location_grpc_pb.d.ts: TypeScript definitions for the gRPC service stubs.
+
+7. Update Imports in Your Code
+Ensure your location.grpc.ts file imports the generated files correctly:
+
+import { LocationService } from "./proto/location_grpc_pb";
+import { FindNearestDriversRequest, FindNearestDriversResponse } from "./proto/location_pb";
+
+8. Run Your gRPC Server
+After generating the files, you can run your gRPC server as usual:
+
+node dist/location.grpc.js

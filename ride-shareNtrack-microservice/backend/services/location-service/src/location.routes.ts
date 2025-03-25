@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { updateLocation, getNearbyDriversAPI } from "../controllers/location.controller";
-import { authenticateUser } from "../middlewares/auth.middleware";
+import { updateLocation, getNearbyDriversAPI } from "./location.controllers";
+import { authenticateUser } from "./location.middlewares";
 
 const router = Router();
 

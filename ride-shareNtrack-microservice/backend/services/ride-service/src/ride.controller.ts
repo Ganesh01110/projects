@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { createRide, assignDriver, updateRideStatus, getRideById } from "../services/ride.service";
-import { publishRideEvent } from "../kafka/ride.kafkaClient";
-import { io } from "../websockets";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { createRide, assignDriver, updateRideStatus, getRideById } from "./ride.services";
+import { publishRideEvent } from "./ride.kafkaClient";
+import { io } from "./ride.WSClient";
+import { AuthRequest } from "./ride.middlewares";
 
 export const requestRide = async (req: AuthRequest, res: Response) => {
   try {

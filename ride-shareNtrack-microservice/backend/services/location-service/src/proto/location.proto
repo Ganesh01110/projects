@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package location;
+
+service LocationService {
+  // Get nearby drivers based on location
+  rpc FindNearestDrivers (FindNearestDriversRequest) returns (FindNearestDriversResponse);
+
+  // Update a driver's location
+  rpc UpdateDriverLocation (UpdateDriverLocationRequest) returns (UpdateDriverLocationResponse);
+
+  // Get a specific driver's location
+  rpc GetDriverLocation (GetDriverLocationRequest) returns (GetDriverLocationResponse);
+}
+
+// Request to find nearby drivers
+message FindNearestDriversRequest {
+  double latitude = 1;
+  double longitude = 2;
+  double radius = 3;
+}
+
+// Response with a list of nearby drivers
+message FindNearestDriversResponse {
+  repeated DriverLocation drivers = 1;
+}
+
+// Request to update driver location
+message UpdateDriverLocationRequest {
+  string driverId = 1;
+  double latitude = 2;
+  double longitude = 3;
+}
+
+// Response after updating driver location
+message UpdateDriverLocationResponse {
+  bool success = 1;
+}
+
+// Request to get a specific driver's location
+message GetDriverLocationRequest {
+  string driverId = 1;
+}
+
+// Response with driver location
+message GetDriverLocationResponse {
+  DriverLocation location = 1;
+}
+
+// Driver location structure
+message DriverLocation {
+  string driverId = 1;
+  double latitude = 2;
+  double longitude = 3;
+  string lastUpdated = 4;
+}
