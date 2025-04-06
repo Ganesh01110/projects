@@ -4,12 +4,15 @@ import { publishLocationEvent } from "./locations.kafkaClient";
 import { io } from "./location.WSClient";
 import { AuthRequest } from "./location.middlewares";
 
-export const updateLocation = async (req: AuthRequest, res: Response) => {
+export const updateLocation = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { latitude, longitude } = req.body;
     const driverId = req.user?.id;
 
-    if (!driverId) return res.status(401).json({ message: "Unauthorized" });
+    if (!driverId) {
+      res.status(400).json({ message: "Driver ID is required" });
+      return;
+    }
 
     const location = await updateDriverLocation(driverId, latitude, longitude);
     

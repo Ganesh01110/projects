@@ -5,16 +5,20 @@ export interface AuthRequest extends Request {
   user?: { id: string };
 }
 
-export const authenticateUser = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticateUser = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const token = req.headers.authorization?.split(" ")[1];
 
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  if (!token) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  } 
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+     res.status(401).json({ message: "Invalid token" });
+     return;
   }
 };

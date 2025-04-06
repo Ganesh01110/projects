@@ -11,6 +11,7 @@
       }
     },
     "include": ["src", "infra"],  // Add infra directory here
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules"],
+    "strictFunctionTypes": false
   }
   

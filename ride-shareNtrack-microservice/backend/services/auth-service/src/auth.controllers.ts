@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response ,RequestHandler  } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "../../../infra/generated/auth-client";
@@ -27,17 +27,20 @@ const generateRefreshToken = (userId: string) => {
  * @route POST /auth/register
  * @desc Register a new user
  */
-export const register = async (req: Request, res: Response) => {
+export const register   = async (req: Request, res: Response): Promise<void> => {
+// export const register : RequestHandler  = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      return res.status(400).json({ message: "All fields are required" });
+       res.status(400).json({ message: "All fields are required" });
+       return;
     }
 
     const existingUser = await authClient.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+       res.status(400).json({ message: "User already exists" });
+       return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,10 +53,15 @@ export const register = async (req: Request, res: Response) => {
     // ✅ Publish event to Kafka for notification service
     await publishUserRegistered({ email, name });
 
-    res.status(201).json({ message: "User registered successfully", userId: user.id });
-  } catch (error) {
-    console.error("Register Error:", error);
-    res.status(500).json({ message: "Server error" });
+     res.status(201).json({ message: "User registered successfully", userId: user.id });
+  } catch (error:any) {
+    // console.error("Register Error:", error);
+    // return res.status(500).json({ message: "Server error" });
+    if (error instanceof Error) {
+       res.status(400).json({ error: error.message });
+    } else {
+       res.status(500).json({ message: "Server error" });
+    } 
   }
 };
 
@@ -61,22 +69,25 @@ export const register = async (req: Request, res: Response) => {
  * @route POST /auth/login
  * @desc Authenticate user & get token
  */
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+       res.status(400).json({ message: "Email and password are required" });
+       return;
     }
 
     const user = await authClient.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+       res.status(400).json({ message: "Invalid credentials" });
+       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+       res.status(400).json({ message: "Invalid credentials" });
+       return;
     }
 
     const token = generateToken(user.id, user.email);
@@ -96,17 +107,19 @@ export const login = async (req: Request, res: Response) => {
  * @route POST /auth/forgot-password
  * @desc Send password reset link
  */
-export const forgotPassword = async (req: Request, res: Response) => {
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+       res.status(400).json({ message: "Email is required" });
+       return;
     }
 
     const user = await authClient.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+       res.status(400).json({ message: "User not found" });
+       return;
     }
 
     const resetToken = Math.random().toString(36).substring(2, 15);
