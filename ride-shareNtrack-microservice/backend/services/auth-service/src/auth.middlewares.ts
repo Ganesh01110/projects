@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "../../../infra/generated/auth-client";
 import rateLimit from "express-rate-limit";
 import { isRateLimited } from "./auth.redis";
-
+import { logger } from "./auth.logger";
 
 
 export const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
@@ -10,6 +10,7 @@ export const rateLimiter = async (req: Request, res: Response, next: NextFunctio
 //   const key = `rate:${ip}`;
   
   if (await isRateLimited(ip as string)) {
+    logger.warn("Rate limit exceeded for IP:", ip);
     return res.status(429).json({ message: "Too many requests, slow down!" });
   }
 
@@ -23,6 +24,7 @@ export const dbHealthCheck = async (req: Request, res: Response, next: NextFunct
     await authClient.$queryRaw`SELECT 1`;
     next();
   } catch (error) {
+    logger.error("Database Connection Error:", error);
     console.error("Database Connection Error:", error);
     return res.status(503).json({ message: "Database unavailable" });
   }

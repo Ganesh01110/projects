@@ -1,12 +1,46 @@
-import prisma from "../prisma/client";
+// import prisma from "../prisma/client";
+import { DriverLocation, PrismaClient } from "../../../infra/generated/location-client";
+
 import { cacheDriverLocation, getCachedDriverLocation, redisClient, storeDriverGeoLocation , getNearbyDriversFromRedis as fetchNearbyDrivers} from "./location.redis";
 
+
+const locationClient = new PrismaClient();
+
 export const updateDriverLocation = async (driverId: string, latitude: number, longitude: number) => {
-  const location = await prisma.driverLocation.upsert({
+  // const location = await locationClient.driverLocation.upsert({
+  //   where: { driverId },
+  //   update: { latitude,
+  //      longitude,
+  //      coordinates: locationClient.$queryRaw`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
+  //       lastUpdated: new Date() },
+  //   create: { driverId,
+  //      latitude,
+  //      coordinates: locationClient.$queryRaw`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
+  //       longitude },
+  // });
+
+  const existingLocation = await locationClient.driverLocation.findUnique({
     where: { driverId },
-    update: { latitude, longitude, lastUpdated: new Date() },
-    create: { driverId, latitude, longitude },
   });
+
+  let location;
+  if (existingLocation) {
+    // Update existing location
+    location = await locationClient.$executeRaw`
+      UPDATE "DriverLocation"
+      SET "latitude" = ${latitude},
+          "longitude" = ${longitude},
+          "coordinates" = ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
+          "lastUpdated" = NOW()
+      WHERE "driverId" = ${driverId}
+    `;
+  } else {
+    // Create new location
+    location = await locationClient.$executeRaw`
+      INSERT INTO "DriverLocation" ("id", "driverId", "latitude", "longitude", "coordinates", "lastUpdated")
+      VALUES (gen_random_uuid(), ${driverId}, ${latitude}, ${longitude}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), NOW())
+    `;
+  }
 
   // Write-Through: Update Redis immediately
   // await redisClient.set(`driver:${driverId}`, JSON.stringify({ latitude, longitude }), "EX", 60);
@@ -39,7 +73,9 @@ export const getNearbyDrivers = async (latitude: number, longitude: number, radi
   //     ${radius}
   //   )
   // `;
-  const drivers = await prisma.$queryRaw`
+
+
+  const drivers = await locationClient.$queryRaw<DriverLocation[]>`
   SELECT * FROM "DriverLocation"
   WHERE ST_DWithin(
     "coordinates",
@@ -47,6 +83,16 @@ export const getNearbyDrivers = async (latitude: number, longitude: number, radi
     ${radius}
   )
 `;
+
+// sql injection free
+// const drivers = await locationClient.$queryRaw`
+//   SELECT * FROM "DriverLocation"
+//   WHERE ST_DWithin(
+//     "coordinates",
+//     ST_SetSRID(ST_MakePoint($1, $2), 4326),
+//     $3
+//   )
+// `, longitude, latitude, radius;
 
 
   // Cache the result
@@ -68,13 +114,14 @@ export const getDriverLocation = async (driverId: string) => {
   // if (cachedLocation) {
   //   return JSON.parse(cachedLocation);
   // }
-  const cachedLocation = await getCachedDriverLocation(driverId);
+  try {
+    const cachedLocation = await getCachedDriverLocation(driverId);
   if (cachedLocation) return cachedLocation;
   
-
+ 
 
   // Fetch from database if not in cache
-  const location = await prisma.driverLocation.findUnique({
+  const location = await locationClient.driverLocation.findUnique({
     where: { driverId },
   });
 
@@ -85,12 +132,24 @@ export const getDriverLocation = async (driverId: string) => {
   }
 
   return location;
+
+  } catch (error) {
+    console.error("❌ Error fetching driver location:", error);
+    throw error;
+  }
+  
 };
 
 // Store driver location in Redis using Redis GEO (Alternative method)
 export const setDriverGeoLocation = async (driverId: string, latitude: number, longitude: number) => {
   // await redisClient.geoadd("drivers:geo", longitude, latitude, driverId);
-  await storeDriverGeoLocation(driverId, latitude, longitude);
+  // await storeDriverGeoLocation(driverId, latitude, longitude);
+  try {
+    await storeDriverGeoLocation(driverId, latitude, longitude);
+  } catch (error) {
+    console.error("❌ Error setting driver geo-location in Redis:", error);
+    throw error;
+  }
 
 };
 

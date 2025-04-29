@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package notification;
+
+// The NotificationService definition
+service NotificationService {
+  // Sends a notification
+  rpc sendNotification (SendNotificationRequest) returns (SendNotificationResponse);
+}
+
+// The request message containing the notification details
+message SendNotificationRequest {
+  string userId = 1;        // ID of the user to send the notification to
+  string message = 2;       // Notification message
+  string type = 3;          // Type of notification (e.g., EMAIL, SMS, PUSH)
+  string priority = 4;      // Priority of the notification (e.g., HIGH, LOW)
+  string channel = 5;       // Channel of the notification (e.g., PUSH, EMAIL)
+}
+
+// The response message for the sendNotification RPC
+message SendNotificationResponse {
+  bool success = 1;         // Indicates if the notification was sent successfully
+}

@@ -1,24 +1,29 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { logger } from "./user.logger";
 
 // Extend Express Request Type to include "user"
 export interface AuthRequest extends Request {
   user?: { id: string };
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    logger.warn("Unauthorized access attempt without token.");
+     res.status(401).json({ message: "Unauthorized" });
+     return;
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     req.user = decoded;
-    return next();
+     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    logger.error("Invalid token:", error);
+     res.status(401).json({ message: "Invalid token" });
+     return;
   }
 };
 
@@ -26,11 +31,15 @@ export const validateUserUpdate = (req: Request, res: Response, next: NextFuncti
   const { name, bio } = req.body;
 
   if (name && typeof name !== "string") {
-    return res.status(400).json({ message: "Invalid name format" });
+    logger.warn("Invalid name format:", name);
+     res.status(400).json({ message: "Invalid name format" });
+    return;
   }
 
   if (bio && typeof bio !== "string") {
-    return res.status(400).json({ message: "Invalid bio format" });
+    logger.warn("Invalid bio format:", bio);
+     res.status(400).json({ message: "Invalid bio format" });
+     return;
   }
 
   next();

@@ -4,12 +4,14 @@ import { publishRideEvent } from "./ride.kafkaClient";
 import { io } from "./ride.WSClient";
 import { AuthRequest } from "./ride.middlewares";
 
-export const requestRide = async (req: AuthRequest, res: Response) => {
+export const requestRide = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { pickup, dropoff, fare } = req.body;
     const userId = req.user?.id;
 
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    if (!userId) {
+       res.status(401).json({ message: "Unauthorized" });
+       return;}
 
     const ride = await createRide(userId, pickup, dropoff, fare);
     await publishRideEvent("ride-requested", ride);
@@ -21,12 +23,15 @@ export const requestRide = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const acceptRide = async (req: AuthRequest, res: Response) => {
+export const acceptRide = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { rideId } = req.body;
     const driverId = req.user?.id;
 
-    if (!driverId) return res.status(401).json({ message: "Unauthorized" });
+    if (!driverId)  {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
     const ride = await assignDriver(rideId, driverId);
     await publishRideEvent("ride-accepted", ride);
@@ -40,7 +45,7 @@ export const acceptRide = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateRide = async (req: AuthRequest, res: Response) => {
+export const updateRide = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { rideId, status } = req.body;
 

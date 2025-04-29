@@ -8,7 +8,10 @@ export const makePayment = async (req: AuthRequest, res: Response) => {
     const { rideId, amount, method } = req.body;
     const userId = req.user?.id;
 
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    if (!userId)  {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+  }
 
     const payment = await processPayment(userId, rideId, amount, method);
     await publishPaymentEvent("payment-success", payment);

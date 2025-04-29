@@ -13,6 +13,7 @@ model Transaction {
   userId    String
   rideId    String
   amount    Float
+  method    String
   status    PaymentStatus @default(PENDING)
   createdAt DateTime      @default(now())
 

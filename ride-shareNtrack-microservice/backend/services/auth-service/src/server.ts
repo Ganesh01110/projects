@@ -45,9 +45,19 @@ Object.entries(services).forEach(([name, target]) => {
   app.use(`/${name}`, createProxyMiddleware({ target, changeOrigin: true }));
 });
 
+const startServer = async () => {
+  try {
+    await connectKafka();
+    console.log("Auth service is ready!");
+  } catch (error) {
+    console.error("Failed to start auth service:", error);
+  }
+};
+
 app.listen(PORT, async () => {
   console.log(`Auth service running on port ${PORT}`);
-  await connectKafka(); // ✅ Initialize Kafka producer & consumer
+  startServer();
+  // await connectKafka(); // ✅ Initialize Kafka producer & consumer
   // await kafkaConsumer(); // Start Kafka consumer
   // await kafkaProducer(); // Initialize producer
 });

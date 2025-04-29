@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
-import notificationRoutes from "./routes/notificationRoutes.js";
-import { consumeKafkaEvents } from "./kafka/kafkaConsumer.js";
-import { initializeWebSocket } from "./websocket/webSocketLogic.js";
-import { startGRPCServer } from "./grpc/grpcServer.js";
+import notificationRoutes from "./notification.router";
+import { consumeKafkaEvents } from "./notification.kafkaClient";
+import { initializeWebSocket } from "./notification.WSClient";
+import { startGRPCServer } from "./notification.grpcServer";
 
 dotenv.config();
 const app = express();

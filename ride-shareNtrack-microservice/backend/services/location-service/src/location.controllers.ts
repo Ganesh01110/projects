@@ -3,6 +3,7 @@ import { updateDriverLocation, getNearbyDrivers } from "./location.service";
 import { publishLocationEvent } from "./locations.kafkaClient";
 import { io } from "./location.WSClient";
 import { AuthRequest } from "./location.middlewares";
+import { logger } from "./location.logger";
 
 export const updateLocation = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -10,6 +11,7 @@ export const updateLocation = async (req: AuthRequest, res: Response): Promise<v
     const driverId = req.user?.id;
 
     if (!driverId) {
+      logger.warn("Driver ID is missing in the request.");
       res.status(400).json({ message: "Driver ID is required" });
       return;
     }

@@ -336,3 +336,42 @@ import { FindNearestDriversRequest, FindNearestDriversResponse } from "./proto/l
 After generating the files, you can run your gRPC server as usual:
 
 node dist/location.grpc.js
+
+
+
+
+===========================29-04-25==================================
+access to kafka
+
+remove existing image of zookeeper and kafka then run
+
+docker run -d --name zookeeper -p 2181:2181 -e ALLOW_ANONYMOUS_LOGIN=yes bitnami/zookeeper:latest
+
+
+docker run -d --name kafka ^
+  -p 9092:9092 ^
+  --link zookeeper:zookeeper ^
+  -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181 ^
+  -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092 ^
+  -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 ^
+  -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT ^
+  -e ALLOW_PLAINTEXT_LISTENER=yes ^
+  bitnami/kafka:latest
+
+  ----------------------------------------
+  docker stop kafka
+docker rm kafka
+  docker run -d --name kafka ^
+  -p 9092:9092 ^
+  --link zookeeper:zookeeper ^
+  -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181 ^
+  -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092 ^
+  -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.1.100:9092 ^
+  -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT ^
+  -e ALLOW_PLAINTEXT_LISTENER=yes ^
+  bitnami/kafka:latest
+
+  const kafka = new Kafka({
+  clientId: "notification-service",
+  brokers: ["192.168.1.100:9092"], // Replace with your host machine's IP
+});

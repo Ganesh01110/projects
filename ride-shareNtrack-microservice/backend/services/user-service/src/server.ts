@@ -17,8 +17,18 @@ app.use("/user", userRoutes);
 
 const PORT = process.env.PORT || 5001;
 
+const startServer = async () => {
+  try {
+    await connectKafka();
+    console.log("Auth service is ready!");
+  } catch (error) {
+    console.error("Failed to start auth service:", error);
+  }
+};
+
 app.listen(PORT, async () => {
 
   console.log(`user Service running on port ${PORT}`);
-  await connectKafka(); // Initialize Kafka
+  // await connectKafka(); // Initialize Kafka
+  startServer();
 });

@@ -15,9 +15,19 @@ app.use(helmet());
 const PORT = process.env.PORT || 5002;
 app.use("/api/rides", rideRoutes);
 
+const startServer = async () => {
+  try {
+    await connectKafka();
+    console.log("Ride service is ready!");
+  } catch (error) {
+    console.error("Failed to start ride service:", error);
+  }
+};
+
 app.listen(PORT, async() => {
   console.log(`ride Service running on port ${PORT}`);
-  await connectKafka();
+  // await connectKafka();
+  startServer();
 });
 
 

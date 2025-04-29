@@ -2,7 +2,7 @@ import { Request, Response ,RequestHandler  } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "../../../infra/generated/auth-client";
-
+import { logger } from "./auth.logger";
 // import { sendEmail } from "../utils/sendEmail";  
 
 import { redisClient, storeResetToken } from "./auth.redis";
@@ -33,6 +33,7 @@ export const register   = async (req: Request, res: Response): Promise<void> => 
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
+        logger.warn("All fields are required for registration.");
        res.status(400).json({ message: "All fields are required" });
        return;
     }
@@ -58,8 +59,10 @@ export const register   = async (req: Request, res: Response): Promise<void> => 
     // console.error("Register Error:", error);
     // return res.status(500).json({ message: "Server error" });
     if (error instanceof Error) {
+      logger.error("Registration Error:", error.message);
        res.status(400).json({ error: error.message });
     } else {
+      logger.error("Registration Error:", error);
        res.status(500).json({ message: "Server error" });
     } 
   }
@@ -74,18 +77,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     if (!email || !password) {
+        logger.warn("Email and password are required for login.");
        res.status(400).json({ message: "Email and password are required" });
        return;
     }
 
     const user = await authClient.user.findUnique({ where: { email } });
     if (!user) {
+        logger.warn("Invalid credentials: User not found.");
        res.status(400).json({ message: "Invalid credentials" });
        return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+        logger.warn("Invalid credentials: Password mismatch.");
        res.status(400).json({ message: "Invalid credentials" });
        return;
     }
@@ -97,9 +103,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     await redisClient.setEx(`refresh:${user.id}`, 604800, refreshToken); // Expires in 7 days
 
     res.status(200).json({ message: "Login successful", token, refreshToken, user });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Server error" });
+  } catch (error:any) {
+    // console.error("Login Error:", error);
+    // res.status(500).json({ message: "Server error" });
+    if (error instanceof Error) {
+      logger.error("Login Error:", error.message);
+       res.status(400).json({ error: error.message });
+    } else {
+      logger.error("Login Error:", error);
+       res.status(500).json({ message: "Server error" });
+    }
   }
 };
 
@@ -112,12 +125,14 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     const { email } = req.body;
 
     if (!email) {
+        logger.warn("Email is required for password reset.");
        res.status(400).json({ message: "Email is required" });
        return;
     }
 
     const user = await authClient.user.findUnique({ where: { email } });
     if (!user) {
+        logger.warn("User not found for password reset.");
        res.status(400).json({ message: "User not found" });
        return;
     }
@@ -133,9 +148,16 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     await publishForgotPassword({ email, resetToken });
 
     res.status(200).json({ message: "Password reset email sent" });
-  } catch (error) {
-    console.error("Forgot Password Error:", error);
-    res.status(500).json({ message: "Server error" });
+  } catch (error:any) {
+    // console.error("Forgot Password Error:", error);
+    // res.status(500).json({ message: "Server error" });
+    if (error instanceof Error) {
+      logger.error("Forgot Password Error:", error.message);
+       res.status(400).json({ error: error.message });
+    } else {
+      logger.error("Forgot Password Error:", error);
+       res.status(500).json({ message: "Server error" });
+    }
   }
 };
 

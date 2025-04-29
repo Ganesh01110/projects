@@ -6,11 +6,14 @@
       "moduleResolution": "Node",
       "baseUrl": "./",
       "paths": {
-        "@infra/*": ["infra/*"],  // Optional alias
-        "@services/*": ["src/services/*"]
+        // "@infra/*": ["infra/*"],  // Optional alias
+        "@infra/*": ["backend/infra/*"],
+        // "@services/*": ["src/services/*"]
+        "@services/*": ["backend/services/*"]
       }
     },
-    "include": ["src", "infra"],  // Add infra directory here
+    // "include": ["src", "infra"],  // Add infra directory here
+    "include": ["backend/**/*"],
     "exclude": ["node_modules"],
     "strictFunctionTypes": false
   }

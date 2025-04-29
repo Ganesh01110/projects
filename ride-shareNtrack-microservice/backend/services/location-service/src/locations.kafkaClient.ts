@@ -1,7 +1,12 @@
 import { Kafka, Producer } from "kafkajs";
 import { io } from "./location.WSClient";
 
-const kafka = new Kafka({ clientId: "ride-service", brokers: ["kafka:9092"] });
+const kafka = new Kafka({ 
+  clientId: "ride-service",
+  // brokers: ["192.168.1.100:9092"],
+  brokers:["localhost:9092"],
+  //  brokers: ["kafka:9092"] 
+  });
 
 const producer: Producer = kafka.producer();
 

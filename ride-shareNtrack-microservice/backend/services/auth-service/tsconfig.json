@@ -1,4 +1,5 @@
 {
+  // "extends": "../../tsconfig.json",
     "compilerOptions": {
       "target": "ES6",
       "module": "CommonJS",
@@ -10,7 +11,7 @@
       // "baseUrl": "./",
       "baseUrl": "../../",  // Navigate two levels up to the root
       "paths": {
-        "@infra/*": ["../../../infra/*"]  ,// Create alias for infra
+        "@infra/*": ["../../infra/*"]  ,// Create alias for infra
         "@prisma/auth-client": ["generated/auth-client"],
         "@prisma/user-client": ["generated/user-client"],
         "@prisma/ride-client": ["generated/ride-client"],
@@ -20,7 +21,7 @@
         "@prisma/recomendation-client": ["generated/recomendation-client"]
       }
     },
-    "include": ["src", "../../../infra"],  // Add infra directory
+    "include": ["src", "../../infra"],  // Add infra directory
     "exclude": ["node_modules"]
   }
   
