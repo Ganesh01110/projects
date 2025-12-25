@@ -1,0 +1,493 @@
+Excellent — this is **exactly** the kind of artifact senior engineers use to coordinate unfinished work across agents and teams.
+Below is a **handoff-quality implementation continuation document** that you can give **directly to an agentic AI or developer**.
+
+I’ve written it as:
+
+* **Clear scope**
+* **What is already done vs unfinished**
+* **Exact modules to complete**
+* **Backend + Frontend sync**
+* **Flow-driven (Entry → Exit)**
+* **Strictly aligned with your LLD image**
+
+No fluff, no tutorials — this is **execution-focused**.
+
+---
+
+# 🚗 Smart Parking System
+
+## Backend Completion + Frontend Synchronization Document
+
+### Purpose of This Document
+
+This document defines **unfinished backend work**, **required frontend synchronization**, and **end-to-end functional flow** based on the finalized **LLD, design patterns, DB design, and DSA plan** shown in the provided architecture image.
+
+This document is intended to be given to an **agentic AI / developer** to:
+
+* Complete **remaining backend logic**
+* Ensure **correct pattern usage**
+* Synchronize **frontend workflows** with backend APIs
+* Maintain **professional, production-grade quality**
+
+---
+
+## 1. Current Status (Assumed)
+
+### ✅ Already Implemented (by agentic AI)
+
+* Spring Boot base project
+* Core domain entities (Vehicle, ParkingLot, ParkingFloor, ParkingSlot)
+* Entry / Exit Gate controllers
+* Basic Command + Template Method structure
+* JWT-based authentication (Admin / Operator / User)
+* Initial DB connection (MariaDB)
+* Basic REST controllers
+
+---
+
+## 2. Remaining Work – High-Level Breakdown
+
+### Backend (Spring Boot)
+
+1. Vehicle Registration & Management
+2. Parking Area & Slot Registration (Admin)
+3. Slot Allocation Logic (Strategy + State)
+4. Parking Session Lifecycle
+5. Pricing & Billing Engine
+6. Discount Engine (Chain of Responsibility)
+7. Real-time Availability (Observer skeleton)
+8. Dashboard Aggregations
+9. API Contract finalization for frontend
+
+### Frontend (React)
+
+1. Vehicle registration flow
+2. Parking lot / floor / slot registration UI
+3. Slot selection UI (rule-based)
+4. Entry → Parking → Exit flow
+5. Billing preview & confirmation
+6. Dashboard synchronization
+7. Error + validation alignment
+
+---
+
+## 3. Backend – Detailed Implementation Tasks
+
+---
+
+## 3.1 Vehicle Registration Module
+
+### Purpose
+
+Allow users to register vehicles before parking.
+
+### Entity
+
+```java
+Vehicle
+- id
+- vehicleNumber (unique)
+- vehicleType (CAR, BIKE, EV, HANDICAPPED)
+- ownerId
+- createdAt
+```
+
+### Pattern
+
+* **Factory Pattern**
+
+  * VehicleFactory creates concrete vehicle types
+  * No switch-case in services
+
+### APIs
+
+```http
+POST /api/vehicles
+GET  /api/vehicles/user/{userId}
+```
+
+### Notes
+
+* Validate vehicle number format
+* Prevent duplicate registration
+* Vehicle type influences:
+
+  * Slot eligibility
+  * Pricing strategy
+
+---
+
+## 3.2 Parking Area Registration (Admin)
+
+### Purpose
+
+Admin defines parking infrastructure.
+
+### Composite Pattern Structure
+
+```
+ParkingLot
+ └── ParkingFloor
+      └── ParkingSlot
+```
+
+### APIs (Admin-only)
+
+```http
+POST /api/admin/parking-lots
+POST /api/admin/parking-floors
+POST /api/admin/parking-slots
+```
+
+### Slot Attributes
+
+```java
+ParkingSlot
+- slotNumber
+- slotType (COMPACT, LARGE, EV, HANDICAPPED)
+- state (FREE, OCCUPIED, RESERVED, OUT_OF_SERVICE)
+```
+
+### Important Rules
+
+* SlotType must match VehicleType
+* Slot state handled via **State Pattern**
+* Slot should notify observers on state change
+
+---
+
+## 3.3 Slot Allocation Logic
+
+### Pattern
+
+**Strategy Pattern**
+
+### Context
+
+```java
+SlotAllocationService
+```
+
+### Strategies
+
+* NearestSlotStrategy
+* FirstAvailableSlotStrategy
+* DisabledFriendlyStrategy
+
+### Selection Criteria
+
+* Vehicle type
+* User preference
+* Parking lot rules
+* Admin-configured defaults
+
+### API
+
+```http
+GET /api/parking/slots/available?vehicleType=CAR&strategy=NEAREST
+```
+
+---
+
+## 3.4 Parking Session Lifecycle (Core Flow)
+
+### Entity
+
+```java
+ParkingSession
+- sessionId
+- vehicleId
+- parkingSlotId
+- entryTime
+- exitTime
+- status (ACTIVE, COMPLETED)
+```
+
+---
+
+### Entry Flow (Template Method + Command)
+
+```text
+Vehicle arrives
+→ EntryCommand
+→ EntryGateProcessor.process()
+
+Steps:
+1. validateRequest()
+2. fetchContext()
+3. allocateSlot()
+4. createSession()
+5. updateSlotState(FREE → OCCUPIED)
+6. notifyAvailability()
+```
+
+### API
+
+```http
+POST /api/parking/entry
+```
+
+---
+
+### Exit Flow
+
+```text
+Vehicle exits
+→ ExitCommand
+→ ExitGateProcessor.process()
+
+Steps:
+1. fetchSession()
+2. calculateBill()
+3. applyDiscounts()
+4. freeSlot()
+5. closeSession()
+6. notifyAvailability()
+```
+
+### API
+
+```http
+POST /api/parking/exit
+```
+
+---
+
+## 3.5 Pricing & Billing Engine
+
+### Pattern
+
+* **Strategy** → base pricing
+* **Chain of Responsibility** → discounts
+
+---
+
+### Pricing Strategies
+
+```text
+HourlyBillStrategy
+PeakHourBillStrategy
+FlatRateBillStrategy
+```
+
+### Pricing Inputs
+
+* Duration
+* Vehicle type
+* Slot type
+* Parking lot
+
+---
+
+### Discount Chain
+
+```text
+LoyaltyDiscountHandler
+WeekendDiscountHandler
+PromoCodeDiscountHandler
+```
+
+### Discount Rules
+
+* Order matters
+* Each handler decides:
+
+  * Apply?
+  * Pass to next?
+
+---
+
+### API
+
+```http
+GET /api/billing/preview/{sessionId}
+POST /api/billing/pay/{sessionId}
+```
+
+---
+
+## 3.6 Real-Time Availability (Skeleton)
+
+### Pattern
+
+**Observer + Cache-Aside (Skeleton only)**
+
+### Subject
+
+```java
+ParkingSlotAvailabilityPublisher
+```
+
+### Observers
+
+* DashboardObserver
+* CacheObserver
+
+### Current Implementation
+
+* Publish events
+* No WebSocket yet
+* Cache interface only (no Redis logic)
+
+---
+
+## 3.7 Dashboard Aggregation
+
+### Data Points
+
+* Total active sessions
+* Available slots per lot
+* Revenue today / month
+* Vehicle distribution
+
+### API
+
+```http
+GET /api/dashboard/summary
+```
+
+### Pattern
+
+**Facade Pattern**
+
+* DashboardFacade aggregates from:
+
+  * ParkingService
+  * BillingService
+  * AvailabilityService
+
+---
+
+## 4. Frontend Synchronization Requirements
+
+---
+
+## 4.1 Vehicle Registration Flow (Frontend)
+
+### UI
+
+* Form: vehicle number, type
+* Validation before submit
+* Show registered vehicles list
+
+### Backend Sync
+
+```http
+POST /api/vehicles
+GET  /api/vehicles/user/{userId}
+```
+
+---
+
+## 4.2 Parking Flow (Frontend)
+
+### Step-by-Step UX
+
+```text
+1. Select Vehicle
+2. Select Parking Lot
+3. Choose Slot Allocation Strategy (if applicable)
+4. Preview Slot
+5. Confirm Entry
+6. Show “Parked Successfully”
+```
+
+### Important
+
+* Slot selection must reflect backend strategy output
+* No frontend slot guessing
+
+---
+
+## 4.3 Billing & Exit Flow
+
+```text
+1. Initiate Exit
+2. Fetch Bill Preview
+3. Show Price Breakdown
+4. Apply Promo (optional)
+5. Confirm Payment
+6. Exit Confirmation
+```
+
+### UI Must Show
+
+* Base price
+* Applied discounts
+* Final amount
+
+---
+
+## 4.4 Dashboard Sync
+
+### Must Reflect
+
+* Entry / exit instantly (polling for now)
+* Slot state changes
+* Revenue updates
+
+---
+
+## 5. Data Validation & Error Handling (Both Sides)
+
+### Backend
+
+* Meaningful error codes
+* No stack traces exposed
+* Transaction safety
+
+### Frontend
+
+* Inline validation
+* Friendly messages
+* Retry where possible
+
+---
+
+## 6. Development Rules for Agent
+
+1. **Follow LLD strictly**
+2. **No switch-case for business rules**
+3. **Pattern correctness > shortcuts**
+4. **Each module isolated**
+5. **APIs documented**
+6. **No UI assumptions without backend contract**
+7. **Leave extension hooks**
+
+---
+
+## 7. Final End-to-End Flow (Authoritative)
+
+```text
+Vehicle Registration
+→ Parking Lot & Slot Setup (Admin)
+→ Vehicle Entry
+→ Slot Allocation
+→ Parking Session Active
+→ Billing Calculation
+→ Discount Application
+→ Payment
+→ Exit
+→ Slot Released
+→ Dashboard Updated
+```
+
+---
+
+## 8. Final Note (Very Important)
+
+This project is now:
+
+* **System-design interview ready**
+* **Backend-heavy + UI-polished**
+* **Pattern-rich but practical**
+* **Monolith done right**
+
+If you want next, I can:
+
+* Convert this into a **Jira task board**
+* Generate **API contracts (OpenAPI)**
+* Create **test scenarios**
+* Help you explain this in **interviews**
+
+Just say the word.
