@@ -1,0 +1,14 @@
+after login , "{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc2NjMwNjU2MCwiZXhwIjoxNzY2MzkyOTYwfQ.ZTwp0BntODUly_Jw-rZM58KI8SArsVzVeEp8sATvHTM",
+  "type": "Bearer",
+  "id": 1,
+  "username": "admin",
+  "email": "admin@digipark.com",
+  "roles": [
+    "ROLE_ADMIN"
+  ]
+}" logout with "cookies:refreshToken=<eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc2NjMwNjU2MCwiZXhwIjoxNzY2MzkyOTYwfQ.ZTwp0BntODUly_Jw-rZM58KI8SArsVzVeEp8sATvHTM>" in query,and status is "{
+  "message": "No EntityManager with actual transaction available for current thread - cannot reliably process 'remove' call",
+  "timestamp": "2025-12-21T14:13:17.5201505",
+  "status": 500
+}",  while refresh is successful
