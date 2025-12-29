@@ -5,7 +5,8 @@ This repository contains multiple microservice-based projects. Navigate to each 
 ## 📜 Available Projects
 
 - **Appointment Management System** - [appointment-mngmnt-microservice ReadMe](./appointmnt-mngmnt-microservice/readme.md)
-- **Smart Car Parking Management System** - [carpark ReadMe](./carpark/readme.md)
+- **Smart Car Parking Management System** - [carpark ReadMe](./carpark/readme.md) | [Walkthrough](./carpark/docx/walkthrough.md)
+- **RideShare & Track Microservice** - [ride-shareNtrack-microservice ReadMe](./ride-shareNtrack-microservice/readme.md) | [Walkthrough](./ride-shareNtrack-microservice/walkthrough.md)
 
 
 ## 🚀 General Setup Instructions
