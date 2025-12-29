@@ -1,0 +1,25 @@
+{
+    "name": "recommendation-service",
+    "version": "1.0.0",
+    "description": "Microservice for ride and driver recommendations",
+    "main": "src/server.ts",
+    "scripts": {
+        "dev": "nodemon --watch src --exec ts-node src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.js"
+    },
+    "dependencies": {
+        "express": "^4.21.2",
+        "dotenv": "^16.4.7",
+        "kafkajs": "^2.2.4",
+        "mongoose": "^8.0.0",
+        "@prisma/client": "^6.5.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.13.10",
+        "nodemon": "^3.1.9",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.2"
+    }
+}

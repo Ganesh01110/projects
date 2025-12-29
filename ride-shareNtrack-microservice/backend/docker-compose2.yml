@@ -243,6 +243,57 @@ services:
     ports:
       - "5005:5005"
 
+  # MongoDB (Used by Recommendation Service)
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    networks:
+      - ride-network
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Recommendation Engine
+  recommendation-service:
+    build: ./services/recommendation-service
+    container_name: recommendation-service
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - ride-network
+    environment:
+      MONGODB_URL: "mongodb://mongodb:27017/recommendation_db"
+      KAFKA_BROKER: "kafka:9092"
+    ports:
+      - "5006:5006"
+
+  # API Gateway
+  gateway:
+    build: ./gateway
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - auth-service
+      - user-service
+      - ride-service
+    networks:
+      - ride-network
+    environment:
+      AUTH_SERVICE_URL: "http://auth-service:5001"
+      USER_SERVICE_URL: "http://user-service:5002"
+      RIDE_SERVICE_URL: "http://ride-service:5003"
+      LOCATION_SERVICE_URL: "http://location-service:5004"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:5005"
+      RECOMMENDATION_SERVICE_URL: "http://recommendation-service:5006"
+    ports:
+      - "5000:5000"
+
 volumes:
   postgres_auth_data:
   postgres_user_data:
@@ -250,3 +301,4 @@ volumes:
   postgres_location_data:
   postgres_notification_data:
   redis_data:
+  mongodb_data:
