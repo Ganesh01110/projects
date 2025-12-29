@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  body {
+    @apply font-sans antialiased;
+    @apply transition-colors duration-300;
+  }
+
+  /* Dark theme (default) */
+  body {
+    @apply bg-dark-bg text-dark-text-primary;
+  }
+
+  /* Light theme */
+  body.light {
+    @apply bg-light-bg text-light-text-primary;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-opacity-10 backdrop-blur-md border border-opacity-20;
+  }
+
+  .glass-dark {
+    @apply bg-dark-surface bg-opacity-80 backdrop-blur-md border border-dark-border;
+  }
+
+  .glass-light {
+    @apply bg-light-surface bg-opacity-80 backdrop-blur-md border border-light-border;
+  }
+
+  /* Smooth transitions */
+  .transition-theme {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-dark-surface;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-dark-border rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+  }
+
+  /* Light theme scrollbar */
+  .light .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-light-surface;
+  }
+
+  .light .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-light-border;
+  }
+}
+
+/* Component styles */
+@layer components {
+
+  /* Button base */
+  .btn {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-dark-bg hover:bg-primary-light;
+    @apply shadow-lg hover:shadow-glow;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-surface text-dark-text-primary border border-dark-border;
+    @apply hover:border-primary hover:text-primary;
+  }
+
+  .light .btn-secondary {
+    @apply bg-light-surface text-light-text-primary border-light-border;
+    @apply hover:border-primary hover:text-primary;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-dark-surface border border-dark-border rounded-xl p-6;
+    @apply transition-theme hover:border-primary;
+  }
+
+  .light .card {
+    @apply bg-light-surface border-light-border;
+  }
+
+  /* Input base */
+  .input {
+    @apply w-full px-4 py-3 rounded-lg;
+    @apply bg-dark-surface border border-dark-border;
+    @apply text-dark-text-primary placeholder-dark-text-muted;
+    @apply focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary;
+    @apply transition-theme;
+  }
+
+  .light .input {
+    @apply bg-white border-light-border;
+    @apply text-light-text-primary placeholder-light-text-muted;
+  }
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right,
+      #16181d 0%,
+      #2a2d35 50%,
+      #16181d 100%);
+  background-size: 1000px 100%;
+}
+
+.light .skeleton {
+  background: linear-gradient(to right,
+      #e5e7eb 0%,
+      #d1d5db 50%,
+      #e5e7eb 100%);
+  background-size: 1000px 100%;
+}
